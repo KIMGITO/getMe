@@ -6,30 +6,51 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
+            $table->string('phone')->unique()->nullable();
+
+            // Authentication
+            $table->string('password')->nullable();
+            $table->string('pin')->nullable();
+
+            // Role Enum for strict consistency
+            $table->enum('role', ['admin', 'rider', 'buyer'])->default('buyer');
+
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->timestamp('phone_verified_at')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
+
+            // Combined index for faster login lookups
+            $table->index(['phone', 'email']);
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
+        Schema::create('otps', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUlid('user_id')->constrained('users')->cascadeOnDelete();
+
+            $table->string('identifier'); // email or phone
+            $table->string('code');
+
+            $table->enum('purpose', ['login', 'reset_password', 'order_verify']);
+
+            $table->boolean('is_used')->default(false);
+            $table->unsignedTinyInteger('attempts')->default(0);
+            $table->timestamp('expires_at');
+            $table->timestamps();
+
+            $table->index(['identifier', 'purpose', 'is_used']);
         });
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->foreignUlid('user_id')->nullable()->index()->constrained('users')->nullOnDelete();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
@@ -37,13 +58,10 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('otps');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users');
     }
 };
