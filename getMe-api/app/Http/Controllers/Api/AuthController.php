@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterUserRequest;
 use App\Models\Otp;
 use App\Models\User;
+use App\Services\ClientService;
+use App\Services\RiderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,10 +49,8 @@ class AuthController extends Controller
 
     public function loginInit(Request $request)
     {
-
-        return DB::transaction(function () use($request){
             $request->validate([
-                'identifier' => 'required', // can be email or phone
+                'identifier' => 'required',
             ]);
 
             $user = User::where('email', $request->identifier)
@@ -76,15 +76,13 @@ class AuthController extends Controller
                 'auth_type' => 'credential',
                 'message' => 'Please enter your Password or PIN'
             ]);
-        });
     }
 
     /**
      * Step 2: Verify and Login
      */
-    public function loginVerify(Request $request)
+    public function loginVerify(Request $request, RiderService $riderService, ClientService $clientService)
     {
-        return DB::transaction(function() use($request){
             $request->validate([
                 'identifier' => 'required',
                 'credential' => 'required',
@@ -113,12 +111,19 @@ class AuthController extends Controller
             // Create token
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            $isProfileSet = null;
+             if ($user->role == 'rider') $isProfileSet =  $riderService->isRiderProfileSet($user) ;
+             
+             if($user->role == 'buyer' ) $isProfileSet = $clientService->isClientProfileSet($user);
+            
+            
             return response()->json([
                 'access_token' => $token,
                 'token_type' => 'Bearer',
-                'user' => $user
+                'user' => $user,
+                'profile' =>$isProfileSet,
+
             ]);
-        });
     }
 
     /**
@@ -168,10 +173,12 @@ class AuthController extends Controller
 
                     if ($otp->attempts >= 6) {
                         $otp->update(['is_used' => true]); // Burn the OTP
-                        return response()->json(['message' => 'Too many failed attempts. Request a new OTP.'], 422)->send();
+                        throw ValidationException::withMessages([
+                            'credential' => 'Too many failed attempts. Request a new OTP.'
+                        ]);
                     }
                 };
-                throw ValidationException::withMessages(['credential' => 'Invalid PIN/Password']);
+                throw ValidationException::withMessages(['credential' => 'Invalid Code']);
 
             }
 

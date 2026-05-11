@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\RiderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,5 +19,9 @@ Route::middleware('auth:sanctum')->group(function(){
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out']);
     })->name('logout');
+
+    Route::prefix('rider')->name('rider.')->group(function (){
+        Route::post('/{user}/profile/update', [RiderController::class, 'setupProfile'])->name('profile.update');
+    });
 });
 
