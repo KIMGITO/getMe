@@ -61,8 +61,8 @@ class AuthController extends Controller
                 return response()->json(['message' => 'User not found'], 404);
             }
 
-            // Logic for Buyers (OTP-based)
-            if ($user->role === 'buyer') {
+            // Logic for clients (OTP-based)
+            if ($user->role === 'client') {
                 $code = $this->sendOtp($user);
                 return response()->json([
                     'auth_type' => 'otp',
@@ -96,7 +96,7 @@ class AuthController extends Controller
             if (!$user) return response()->json(['message' => 'Unauthorized'], 401);
 
             // Check based on role
-            if ($user->role === 'buyer') {
+            if ($user->role === 'client') {
                 $this->verifyOtp($user, $request->credential);
             } else {
                 // Verify Password or PIN for staff/riders
@@ -114,7 +114,7 @@ class AuthController extends Controller
             $isProfileSet = null;
              if ($user->role == 'rider') $isProfileSet =  $riderService->isRiderProfileSet($user) ;
              
-             if($user->role == 'buyer' ) $isProfileSet = $clientService->isClientProfileSet($user);
+             if($user->role == 'client' ) $isProfileSet = $clientService->isClientProfileSet($user);
             
             
             return response()->json([

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('pin')->nullable();
 
             // Role Enum for strict consistency
-            $table->enum('role', ['admin', 'rider', 'buyer'])->default('buyer');
+            $table->enum('role', ['admin', 'rider', 'client'])->default('client');
 
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();

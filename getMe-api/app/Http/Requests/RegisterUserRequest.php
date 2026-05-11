@@ -39,7 +39,7 @@ class RegisterUserRequest extends FormRequest
             'role' => [
                 'nullable',
                 Rule::in(array_merge(
-                    ['buyer', 'rider'],
+                    ['client', 'rider'],
                     $canCreateAdmin ? ['admin'] : []
                 )),
             ],
