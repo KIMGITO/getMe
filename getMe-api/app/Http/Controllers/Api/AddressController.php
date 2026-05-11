@@ -27,26 +27,19 @@ class AddressController extends Controller
      */
     public function store(AddressRequest $request, User $user, Address $address = null)
     {
-        // 1. Role Authorization
         if (!in_array($user->role, ['client', 'admin'])) {
             return response()->json(['message' => 'Invalid action'], 403);
         }
 
         return DB::transaction(function () use ($request, $user, $address) {
             $validated = $request->validated();
-
-            // Ensure the user_id is set (especially for new addresses)
             $validated['user_id'] = $user->id;
-
-            // 2. The Upsert Logic
-            // If $address is null, it creates. If it exists, it updates.
             $result = Address::updateOrCreate(
                 ['id' => $address?->id],
                 $validated
             );
 
-            // 3. Handle Default Address logic (Suggestion)
-            if ($request->is_default) {
+            if ($validated['is_default']) {
                 Address::where('user_id', $user->id)
                     ->where('id', '!=', $result->id)
                     ->update(['is_default' => false]);

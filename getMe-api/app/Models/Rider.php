@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 class Rider extends Model
 {
 
+    use HasUlids;
     protected $table = 'rider_profiles';    
 
     public  $casts = [

@@ -19,13 +19,14 @@ Route::middleware('auth:sanctum')->group(function(){
     });
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::prefix('riders')->name('rider.')->group(function (){
-        Route::post('/{user}/profile/update', [RiderController::class, 'setupProfile'])->name('profile.update');
+    Route::prefix('riders')->name('riders.')->group(function (){
+        Route::post('/{user}/profile', [RiderController::class, 'setupProfile'])->name('profile.update');
     });
 
-    Route::prefix('clients')->name('client.')->group(function () {
-        Route::post('/{user}/profile/update', [ClientController::class, 'setupProfile'])->name('profile.update');
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::post('/{user}/profile', [ClientController::class, 'setupProfile'])->name('profile.update');
     });
+    
     Route::prefix('addresses')->as('addresses.')->group(function () {
         Route::post('/{user}', [AddressController::class, 'store'])->name('store');
         Route::post('/{user}/{address}', [AddressController::class, 'store'])->name('update');

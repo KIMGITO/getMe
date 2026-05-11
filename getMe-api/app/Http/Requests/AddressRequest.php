@@ -33,6 +33,7 @@ class AddressRequest extends FormRequest
             'house_number' => ['string', 'required', 'max:25'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'is_default' => ['nullable','boolean'],
         ];
     }
 }
