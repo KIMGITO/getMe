@@ -19,7 +19,6 @@ return new class extends Migration
             $table->boolean('is_verified')->default(false);
 
             // Physical Info & Logistics
-            $table->foreignUlid('default_address')->nullable()->constrained('addresses','id');
 
             // Preferences
             $table->boolean('notifications_enabled')->default(true);

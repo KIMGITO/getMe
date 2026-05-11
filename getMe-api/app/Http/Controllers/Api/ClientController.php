@@ -17,7 +17,7 @@ class ClientController extends Controller
     if($user->role !== 'client'){
         throw new Exception('User is not a registered customer');
     }
-        DB::transaction(function () use($request, $user){
+       return  DB::transaction(function () use($request, $user){
             $validated = $request->validated();
             $validated['user_id'] = $user->id;
             $validated['verified'] = true;

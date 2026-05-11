@@ -112,7 +112,10 @@ class AuthController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
 
             $isProfileSet = null;
-             if ($user->role == 'rider') $isProfileSet =  $riderService->isRiderProfileSet($user) ;
+            if ($user->role == 'rider') {
+                $user->tokens()->delete();
+                $isProfileSet =  $riderService->isRiderProfileSet($user);
+            };
              
              if($user->role == 'client' ) $isProfileSet = $clientService->isClientProfileSet($user);
             
@@ -124,6 +127,11 @@ class AuthController extends Controller
                 'profile' =>$isProfileSet,
 
             ]);
+    }
+
+    function logout(Request $request) {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out']);
     }
 
     /**
