@@ -29,8 +29,8 @@ class RiderRequest extends FormRequest
 
             // Identity
             'id_number' => ['required', 'string', 'min:7', 'max:12', Rule::unique('rider_profiles', 'id_number')->ignore($rider->id, 'user_id')],
-            'id_front' => ['required', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
-            'id_back' => ['required', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
+            'id_front' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
+            'id_back' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
 
             // Sacco
             'sacco_name' => ['required', 'string', 'max:255'],

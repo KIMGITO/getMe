@@ -8,6 +8,7 @@ use App\Models\Otp;
 use App\Models\User;
 use App\Services\ClientService;
 use App\Services\RiderService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,6 @@ class AuthController extends Controller
             $user = User::create($validated);
 
             $token = $user->createToken('auth_token')->plainTextToken;
-
             return response()->json([
                 'message' => "$user->name created successfully",
                 'access_token' => $token,
@@ -53,7 +53,8 @@ class AuthController extends Controller
                 'identifier' => 'required',
             ]);
 
-            $user = User::where('email', $request->identifier)
+
+            $user = User::where('email',$request->identifier)
                 ->orWhere('phone', $request->identifier)
                 ->first();
 
@@ -89,7 +90,7 @@ class AuthController extends Controller
             ]);
 
 
-            $user = User::where('email', $request->identifier)
+            $user = User::where('email',$request->identifier)
                 ->orWhere('phone', $request->identifier)
                 ->first();
 
@@ -109,11 +110,12 @@ class AuthController extends Controller
             }
 
             // Create token
+            if($user->role == 'rider') $user->tokens()->delete();
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
             $isProfileSet = null;
             if ($user->role == 'rider') {
-                $user->tokens()->delete();
                 $isProfileSet =  $riderService->isRiderProfileSet($user);
             };
              
@@ -129,9 +131,21 @@ class AuthController extends Controller
             ]);
     }
 
-    protected function logout(Request $request) {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out']);
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            throw new Exception('User not logged in', 401);
+        }
+
+        if ($user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            'message' => 'Logged out'
+        ]);
     }
 
     /**

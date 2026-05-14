@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Rider;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -27,7 +29,6 @@ class RegisterUserRequest extends FormRequest
         $user = Auth::user();
         $canCreateAdmin = $user && $user->role === 'admin';
 
-
         return [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
@@ -45,4 +46,6 @@ class RegisterUserRequest extends FormRequest
             ],
         ];
     }
+
+   
 }
