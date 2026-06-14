@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class RiderLocationService
 {
     public function __construct(
-        protected RiderGeoService $geo
+        protected GeoService $geo
     ) {}
 
     public function updateLocation(float $lat, float $lng, User $user): array

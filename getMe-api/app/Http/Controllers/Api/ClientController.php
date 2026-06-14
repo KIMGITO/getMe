@@ -14,6 +14,7 @@ class ClientController extends Controller
 {
     public function  setupProfile(ClientRequest $request, User $user){
 
+    // client profile
     if($user->role !== 'client'){
         throw new Exception('User is not a registered customer');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use App\Models\Address;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -26,7 +27,13 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function addresses(){
-        return $this->hasMany(Address::class);
+
+    public function orders(){
+        return $this->user->orders();
     }
+
+    public function hasBidedOrder(){
+        return $this->orders()->where('order_status', OrderStatus::BID_SELECTED)->exists();
+    }
+    
 }

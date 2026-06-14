@@ -1,0 +1,140 @@
+flowchart TD
+
+    Start([fa:fa-credit-card User initiates payment]) --> ValidateWallet{fa:fa-balance-scale Check wallet balance}
+    
+    ValidateWallet -->|Insufficient funds| NeedTopUp[fa:fa-plus-circle Need top-up]
+    ValidateWallet -->|Sufficient funds| CreateTransaction[fa:fa-file Create TRANSACTION record<br/>status: pending]
+    
+    NeedTopUp --> RequestTopUp[fa:fa-mobile-alt Request M-Pesa payment]
+    RequestTopUp --> ProcessTopUp[fa:fa-exchange-alt Process M-Pesa top-up]
+    ProcessTopUp --> TopUpResponse{fa:fa-question-circle Top-up successful?}
+    
+    TopUpResponse -->|No| Fail([fa:fa-times-circle Transaction failed])
+    TopUpResponse -->|Yes| UpdateWalletTopUp[fa:fa-wallet Update wallet balance]
+    UpdateWalletTopUp --> CreateTransaction
+    
+    CreateTransaction --> CreatePaymentIntent[fa:fa-bolt Create PAYMENT_INTENT<br/>gateway: mpesa/stripe]
+    
+    CreatePaymentIntent --> CallProvider[fa:fa-exchange-alt Call payment provider API]
+    
+    CallProvider --> ProviderResponse{fa:fa-question-circle Provider response}
+    
+    ProviderResponse -->|Failed| UpdateFailed[fa:fa-exclamation-triangle Update TRANSACTION<br/>status: failed]
+    UpdateFailed --> Fail
+    
+    ProviderResponse -->|Success| StoreProviderResponse[fa:fa-database Store gateway_response<br/>gateway_ref, gateway_fee]
+    
+    StoreProviderResponse --> CreateJournalEntry[fa:fa-book Create JOURNAL_ENTRY<br/>description: payment purpose]
+    
+    CreateJournalEntry --> CreateJournalLines[fa:fa-list-alt Create JOURNAL_LINES<br/>debit/credit entries]
+    
+    CreateJournalLines --> DoubleEntryCheck{fa:fa-calculator Debit = Credit?}
+    
+    DoubleEntryCheck -->|No| Rollback[fa:fa-undo Rollback entire transaction]
+    Rollback --> Fail
+    
+    DoubleEntryCheck -->|Yes| UpdateWallet[fa:fa-wallet Update WALLET balance<br/>INCREMENT version field]
+    
+    UpdateWallet --> UpdateTransaction[fa:fa-check-circle Update TRANSACTION<br/>status: completed]
+    
+    UpdateTransaction --> UpdateSnapshot[fa:fa-chart-line Update LEDGER_SNAPSHOT<br/>end of day balance]
+    
+    UpdateSnapshot --> Success([fa:fa-check Payment complete])
+    
+    %% CORRECTED ESCROW FLOW WITH TOP-UP CHECK
+    Success --> IsOrder{fa:fa-shopping-cart Is this an order?}
+    
+    IsOrder -->|No| DirectTransfer[fa:fa-exchange-alt Direct wallet transfer]
+    DirectTransfer --> End([fa:fa-flag-checkered Flow complete])
+    
+    IsOrder -->|Yes| CalculateSplit[fa:fa-divide Calculate payment split]
+    
+    CalculateSplit --> SplitMoney[fa:fa-chart-pie Split payment:<br/>- Merchant: item cost<br/>- Rider: delivery fee<br/>- Platform: service fee]
+    
+    SplitMoney --> CheckMerchantPayment{fa:fa-balance-scale Merchant amount <=<br/>held amount?}
+    
+    CheckMerchantPayment -->|Yes| PayMerchantImmediately[Release merchant payment<br/>from escrow to merchant wallet]
+    
+    CheckMerchantPayment -->|No| RequestTopUpFromCustomer[fa:fa-mobile-alt Request top-up from customer<br/>for remaining merchant amount]
+    
+    RequestTopUpFromCustomer --> ProcessMerchantTopUp[fa:fa-exchange-alt Process M-Pesa top-up]
+    ProcessMerchantTopUp --> TopUpMerchantResponse{Top-up successful?}
+    
+    TopUpMerchantResponse -->|No| HoldOrder[Hold order until payment<br/>or cancel]
+    HoldOrder --> End
+    
+    TopUpMerchantResponse -->|Yes| UpdateWalletMerchant[fa:fa-wallet Update wallet<br/>with top-up amount]
+    UpdateWalletMerchant --> PayMerchantImmediately
+    
+    PayMerchantImmediately --> MerchantJournal[fa:fa-book Journal entry:<br/>Debit: Escrow Liability<br/>Credit: Merchant Wallet Asset]
+    
+    MerchantJournal --> CalculateRemaining[fa:fa-calculator Calculate remaining balance<br/>for rider and platform]
+    
+    CalculateRemaining --> CheckRemainingBalance{fa:fa-balance-scale Remaining >=<br/>rider + platform fees?}
+    
+    CheckRemainingBalance -->|No| RequestRiderTopUp[fa:fa-mobile-alt Request top-up for<br/>shortfall amount]
+    RequestRiderTopUp --> ProcessRiderTopUp[fa:fa-exchange-alt Process M-Pesa top-up]
+    ProcessRiderTopUp --> TopUpRiderResponse{Top-up successful?}
+    
+    TopUpRiderResponse -->|No| AdjustSplit[Reduce rider/platform payment<br/>or hold order]
+    AdjustSplit --> HoldRiderPayment
+    
+    TopUpRiderResponse -->|Yes| UpdateWalletRider[fa:fa-wallet Update wallet<br/>with top-up amount]
+    UpdateWalletRider --> HoldRiderPayment
+    
+    CheckRemainingBalance -->|Yes| HoldRiderPayment[HOLD: Rider payment in escrow<br/>status: held_for_delivery]
+    
+    HoldRiderPayment --> RiderDelivers{fa:fa-motorcycle Order delivered?}
+    
+    RiderDelivers -->|Yes| VerifyDelivery[fa:fa-check-circle Verify delivery confirmation<br/>OTP / Photo / Signature]
+    
+    VerifyDelivery --> ReleaseRiderPayment[Release rider payment from escrow<br/>to rider wallet]
+    
+    ReleaseRiderPayment --> RiderJournal[fa:fa-book Journal entry:<br/>Debit: Escrow Liability<br/>Credit: Rider Wallet Asset]
+    
+    RiderJournal --> DeductPlatformFee[fa:fa-charging-station Deduct platform fee<br/>to revenue account]
+    
+    DeductPlatformFee --> DeliveryComplete[fa:fa-truck Order complete]
+    
+    RiderDelivers -->|No| CheckTimeout{fa:fa-hourglass-half Delivery timeout?<br/>e.g., 60 minutes}
+    
+    CheckTimeout -->|No| RiderDelivers
+    
+    CheckTimeout -->|Yes| CustomerDispute{fa:fa-gavel Customer dispute?}
+    
+    CustomerDispute -->|Yes| InvestigateDispute[fa:fa-search Admin investigates]
+    
+    InvestigateDispute --> DisputeResolved{fa:fa-balance-scale Dispute resolved?}
+    
+    DisputeResolved -->|Customer wins| RefundCustomer[fa:fa-undo Refund customer<br/>minus merchant payment]
+    DisputeResolved -->|Rider wins| ReleaseRiderPayment
+    
+    RefundCustomer --> DeductFromPlatform[fa:fa-building Platform absorbs loss<br/>or recovers from insurance]
+    
+    CustomerDispute -->|No| AutoRelease[fa:fa-clock Auto-release to rider<br/>after extended timeout]
+    AutoRelease --> ReleaseRiderPayment
+    
+    DeliveryComplete --> End
+    DeductFromPlatform --> End
+    
+    %% Color Definitions
+    classDef green fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#000000
+    classDef orange fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#000000
+    classDef red fill:#f44336,stroke:#c62828,stroke-width:2px,color:#000000
+    classDef blue fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
+    classDef purple fill:#b8ea26,stroke:#3949ab,stroke-width:2px,color:#000000
+    classDef grey fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#000000
+    classDef yellow fill:#fff9c4,stroke:#f9a825,stroke-width:2px,color:#000000
+    classDef topup fill:#ce93d8,stroke:#6a1b9a,stroke-width:2px,color:#000000
+    
+    %% Apply color classes
+    class NeedTopUp,RequestTopUp,ProcessTopUp,UpdateWalletTopUp,RequestTopUpFromCustomer,ProcessMerchantTopUp,UpdateWalletMerchant,RequestRiderTopUp,ProcessRiderTopUp,UpdateWalletRider topup
+    class PayMerchantImmediate,MerchantJournal,DeductPlatformFee green
+    class HoldRiderPayment orange
+    class RiderDelivers,CheckTimeout orange
+    class CustomerDispute,InvestigateDispute,DisputeResolved,RefundCustomer red
+    class CalculateSplit,SplitMoney,VerifyDelivery,ReleaseRiderPayment,RiderJournal,CalculateRemaining blue
+    class CreateTransaction,CreatePaymentIntent,StoreProviderResponse,CreateJournalEntry,CreateJournalLines purple
+    class UpdateWallet,UpdateTransaction,UpdateSnapshot grey
+    class ValidateWallet,ProviderResponse,DoubleEntryCheck,IsOrder,CheckMerchantPayment,CheckRemainingBalance,TopUpMerchantResponse,TopUpRiderResponse yellow
+    class Start,Success,Fail,End,DeductFromPlatform,DeliveryComplete,DirectTransfer,HoldOrder,AdjustSplit grey

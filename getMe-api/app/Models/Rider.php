@@ -2,11 +2,32 @@
 
 namespace App\Models;
 
+use App\Enums\RiderActivityStatus;
+use App\Models\User;
+use App\Services\GeoService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id', 'id_number', 'id_front_path', 'id_back_path', 'sacco_name', 'sacco_membership_number', 'vehicle_type', 'vehicle_plate_number', 'vehicle_model', 'is_active', 'is_suspended', 'is_blacklisted', 'suspension_reason', 'is_verified'])]
+#[Fillable([
+    'user_id',
+    'id_number',
+    'id_front_path',
+    'id_back_path',
+    'sacco_name',
+    'sacco_membership_number',
+    'vehicle_type',
+    'vehicle_plate_number',
+    'vehicle_model',
+    'is_active',
+    'is_suspended',
+    'activity_status',
+    'is_blacklisted',
+    'suspension_reason',
+    'is_verified',
+    'current_order_id',
+    'assigned_at'
+])]
 
 class Rider extends Model
 {
@@ -14,11 +35,12 @@ class Rider extends Model
 
     protected $table = 'rider_profiles';
 
-    public $casts = [
+    protected $casts = [
         'id_number' => 'encrypted',
         'is_verified' => 'boolean',
         'is_suspended' => 'boolean',
         'is_blacklisted' => 'boolean',
+        'activity_staus' => RiderActivityStatus::class,
     ];
 
     public function user()
@@ -28,6 +50,37 @@ class Rider extends Model
 
     public function scopeAssignable($query)
     {
-        return $query->/*where('is_verified', true)->where('is_active', true)->*/where('is_suspended', false)->where('is_blacklisted', false);
+        return $query->/* where('is_verified', true)->where('is_active', true)-> */where('is_suspended', false)->where('is_blacklisted', false);
+    }
+
+    public function location()
+    {
+        return app(GeoService::class)->getRiderLocation($this->user_id);
+    }
+
+    // actions
+    public function setIdle()
+    {
+        $geo = app(GeoService::class);
+        $id = $this->user_id;
+        $status =  RiderActivityStatus::STATUS_IDLE;
+        $geo->setStatus($id, $status);
+        $this->active_status =  $status;
+    }
+
+
+    public function setNotIdle()
+    {
+        $geo = app(GeoService::class);
+        $id = $this->user_id;
+        $status =  RiderActivityStatus::STATUS_BUSY;
+        $geo->setStatus($id, $status);
+        $this->active_status =  $status;
+    }
+
+
+    public function scopeIsIdle()
+    {
+        return app(GeoService::class)->getStatus($this->user_id) === RiderActivityStatus::STATUS_IDLE;
     }
 }

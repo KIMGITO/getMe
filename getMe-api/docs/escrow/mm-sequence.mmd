@@ -1,0 +1,82 @@
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant API as Payment API
+    participant W as Wallet Service
+    participant L as Ledger Service
+    participant J as Journal Service
+    participant M as M-Pesa/Stripe
+    participant E as Escrow Service
+    participant R as Rider Service
+    participant A as Admin
+
+    %% Phase 1: Payment
+    rect rgb(3, 62, 110)
+        Note over C,M: PHASE 1: PAYMENT INITIALIZATION
+        C->>API: Initiate payment
+        API->>W: Check balance
+        
+        alt Insufficient funds
+            API->>M: Request M-Pesa top-up
+            M-->>API: Top-up processed
+            API->>W: Update wallet balance
+        end
+        
+        API->>L: Create transaction (pending)
+        API->>M: Call payment provider
+        M-->>API: Payment confirmed
+        API->>L: Update transaction (completed)
+    end
+
+    %% Phase 2: Accounting
+    rect rgb(66, 26, 99)
+        Note over L,J: PHASE 2: DOUBLE-ENTRY ACCOUNTING
+        L->>J: Create journal entry
+        J->>J: Add journal lines (debit/credit)
+        J-->>L: Verify sum to zero
+        L->>W: Update cached balance + version
+        L->>L: Update ledger snapshot
+    end
+
+    %% Phase 3: Split & Merchant
+    rect rgb(16, 80, 16)
+        Note over API,E: PHASE 3: MERCHANT PAYMENT
+        API->>API: Calculate split (Merchant/Rider/Platform)
+        
+        alt  held balance < Merchant amount +Rider amount + Platform amount
+            API->>M: Request customer top-up
+            M-->>API: Top-up received
+            API->>W: Update wallet
+        end
+        
+        API->>E: Release merchant payment
+        E->>J: Journal: Escrow Debit / Merchant Credit
+    end
+
+    %% Phase 4: Rider Escrow
+    rect rgb(49, 28, 1)
+        Note over E,R: PHASE 4: RIDER ESCROW
+        E->>E: Hold rider payment
+        E-->>API: Rider payment in escrow
+        API->>W: Update wallet
+        
+    end
+
+    %% Phase 5: Delivery
+    rect rgb(121, 5, 5)
+        Note over R,A: PHASE 5: DELIVERY & DISPUTE
+        R->>API: Confirm delivery (OTP/Photo)
+        API->>E: Release rider payment
+        E->>J: Journal: Escrow Debit / Rider Credit
+        API->>API: Deduct platform fee
+        
+        opt Dispute
+            C->>A: File dispute
+            A->>A: Investigate
+            alt Customer wins
+                A->>API: Process refund
+            else Rider wins
+                A->>E: Release payment
+            end
+        end
+    end

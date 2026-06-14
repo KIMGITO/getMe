@@ -1,0 +1,21 @@
+stateDiagram-v2
+
+    [*] --> Pending
+
+    Pending --> SearchingRiders
+
+    SearchingRiders --> RiderAssigned
+
+    SearchingRiders --> Cancelled
+
+    RiderAssigned --> ClientConfirmed
+
+    RiderAssigned --> RiderRejected
+
+    RiderRejected --> SearchingRiders
+
+    ClientConfirmed --> InDelivery
+
+    InDelivery --> Delivered
+
+    InDelivery --> Cancelled

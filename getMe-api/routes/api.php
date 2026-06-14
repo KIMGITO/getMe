@@ -5,12 +5,24 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\RiderController;
 use App\Http\Controllers\Api\RiderLocationController;
+use App\Http\Controllers\Api\ShoppingListController;
+use App\Http\Controllers\MpesaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WalletController;
+use App\Services\Finance\MpesaService;
 
 Route::post('/login/init', [AuthController::class, 'loginInit'])->name('login.init');
 Route::post('/login', [AuthController::class, 'loginVerify'])->name('login.verify');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/auth/register', [AuthController::class, 'register'])->name('register');
+
+
+Route::post('/mpesa/stk-callback', function (Request $request) {
+    $mpesaService = app(\App\Services\Finance\MpesaService::class);
+    $processor = app(\App\Services\Finance\Transactions\TransactionProcessor::class);
+
+    return $mpesaService->stkCallback($request->all(), $processor);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -28,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('clients')->name('clients.')->group(function () {
         Route::post('/{user}/profile', [ClientController::class, 'setupProfile'])->name('profile.update');
+        Route::post('/address', [AddressController::class, 'store'])->name('address');
     });
 
     Route::prefix('addresses')->as('addresses.')->group(function () {
@@ -36,4 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
     });
 
+    Route::post('/shopping-list', [ShoppingListController::class, 'store'])->name('shoppingList.store');
+
+    Route::post('/wallet/fund', [WalletController::class, 'fund'])->name('wallet.fund');
 });

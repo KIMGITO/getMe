@@ -1,0 +1,88 @@
+stateDiagram-v2
+    [*] --> Initiated: User initiates payment
+    
+    state Initiated {
+        [*] --> WalletCheck
+        WalletCheck --> SufficientFunds: Balance OK
+        WalletCheck --> InsufficientFunds: Need top-up
+        InsufficientFunds --> MpesaTopUp: Request M-Pesa
+        MpesaTopUp --> SufficientFunds: Top-up received
+        MpesaTopUp --> Failed: Top-up failed
+        SufficientFunds --> TransactionCreated: Create transaction
+        TransactionCreated --> ProviderProcessing: Call M-Pesa API
+        ProviderProcessing --> ProviderSuccess: Payment confirmed
+        ProviderProcessing --> ProviderFailed: Payment failed
+        ProviderFailed --> Failed
+    }
+    
+    state ProviderSuccess {
+        [*] --> DoubleEntry
+        DoubleEntry --> JournalCreated: Create journal entry
+        JournalCreated --> LinesAdded: Add debit/credit lines
+        LinesAdded --> Validated: Verify sum to zero
+        Validated --> WalletUpdated: Update balance + version
+        WalletUpdated --> SnapshotUpdated: Update ledger snapshot
+        SnapshotUpdated --> PaymentComplete
+    }
+    
+    PaymentComplete --> IsOrder: Check order type
+    
+    IsOrder --> DirectTransfer: Not an order
+    DirectTransfer --> [*]
+    
+    IsOrder --> OrderFlow: Is an order
+    
+    state OrderFlow {
+        [*] --> CalculateSplit
+        CalculateSplit --> MerchantPayment: Split determined
+        
+        state MerchantPayment {
+            [*] --> CheckMerchantBalance
+            CheckMerchantBalance --> ReleaseMerchant: Sufficient
+            CheckMerchantBalance --> RequestMerchantTopup: Insufficient
+            RequestMerchantTopup --> ProcessMerchantTopup
+            ProcessMerchantTopup --> ReleaseMerchant: Top-up received
+            ProcessMerchantTopup --> MerchantOnHold: Top-up failed
+            ReleaseMerchant --> MerchantPaid
+            MerchantPaid --> [*]
+        }
+        
+        MerchantPayment --> RiderEscrow
+        
+        state RiderEscrow {
+            [*] --> CheckRiderBalance
+            CheckRiderBalance --> HoldRiderPayment: Sufficient
+            CheckRiderBalance --> RequestRiderTopup: Insufficient
+            RequestRiderTopup --> ProcessRiderTopup
+            ProcessRiderTopup --> HoldRiderPayment: Top-up received
+            ProcessRiderTopup --> ReducePayment: Top-up failed
+            ReducePayment --> HoldRiderPayment
+            HoldRiderPayment --> [*]
+        }
+        
+        RiderEscrow --> DeliveryFlow
+        
+        state DeliveryFlow {
+            [*] --> AwaitingDelivery
+            AwaitingDelivery --> Delivered: Rider confirms
+            AwaitingDelivery --> Timeout: 60+ minutes
+            Timeout --> Dispute: Customer disputes
+            Timeout --> AutoRelease: No dispute
+            AutoRelease --> ReleaseRider
+            Dispute --> Investigation
+            Investigation --> CustomerWins: Admin decision
+            Investigation --> RiderWins: Admin decision
+            CustomerWins --> RefundCustomer
+            RiderWins --> ReleaseRider
+            Delivered --> VerifyDelivery
+            VerifyDelivery --> ReleaseRider
+            ReleaseRider --> DeductPlatformFee
+            DeductPlatformFee --> OrderComplete
+        }
+    }
+    
+    Failed --> [*]
+    OrderComplete --> [*]
+    RefundCustomer --> [*]
+    MerchantOnHold --> [*]
+    ReducePayment --> [*]

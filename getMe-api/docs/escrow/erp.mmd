@@ -1,0 +1,83 @@
+erDiagram
+    USERS {
+        string id PK
+        string role
+        string email UK
+        timestamp created_at
+    }
+
+    LEDGER_ACCOUNTS {
+        string id PK
+        string code UK
+        string name
+        string classification
+        string user_id FK
+        string normal_balance
+        timestamp created_at
+    }
+
+    WALLETS {
+        string id PK
+        string user_id FK
+        string ledger_account_id FK
+        decimal cached_balance
+        decimal cached_held_balance
+        string currency
+        bigint version
+        timestamp updated_at
+    }
+
+    TRANSACTIONS {
+        string id PK
+        string reference_id UK
+        string type
+        string status
+        jsonb metadata
+        timestamp created_at
+    }
+
+    JOURNAL_ENTRIES {
+        string id PK
+        string transaction_id FK
+        string description
+        timestamp posted_at
+    }
+
+    JOURNAL_LINES {
+        string id PK
+        string journal_entry_id FK
+        string ledger_account_id FK
+        decimal debit
+        decimal credit
+        string currency
+        timestamp created_at
+    }
+
+    PAYMENT_INTENTS {
+        string id PK
+        string transaction_id FK
+        string gateway
+        string gateway_ref UK
+        decimal external_amount
+        decimal gateway_fee
+        string status
+        jsonb gateway_response
+        timestamp created_at
+    }
+
+    LEDGER_SNAPSHOTS {
+        string id PK
+        string ledger_account_id FK
+        decimal closing_balance
+        date snapshot_date
+        timestamp created_at
+    }
+
+    USERS ||--|| WALLETS : has
+    LEDGER_ACCOUNTS ||--|| WALLETS : wallet
+    LEDGER_ACCOUNTS  ||--|| USERS: user
+    LEDGER_ACCOUNTS ||--o{ JOURNAL_LINES : affects
+    LEDGER_ACCOUNTS ||--o{ LEDGER_SNAPSHOTS : snapshots
+    TRANSACTIONS ||--|| JOURNAL_ENTRIES : generates
+    TRANSACTIONS ||--o{ PAYMENT_INTENTS : uses
+    JOURNAL_ENTRIES ||--o{ JOURNAL_LINES : contains

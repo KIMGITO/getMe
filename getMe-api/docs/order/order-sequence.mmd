@@ -1,0 +1,29 @@
+sequenceDiagram
+
+    participant Client
+    participant Controller
+    participant DB
+    participant Event
+    participant DispatchService
+    participant Riders
+
+    Client->>Controller: Submit Shopping List
+
+    Controller->>DB: Begin Transaction
+
+    Controller->>DB: Create Shopping List
+
+    Controller->>DB: Create Order
+
+    Controller->>DB: Create Locations
+
+    
+    Controller->>Event: Dispatch OrderPlaced
+
+    Event->>DispatchService: Find Nearby Riders
+
+    DispatchService->>Riders: Broadcast Order Available
+
+    Controller->>DB: Commit Transaction
+
+    Controller-->>Client: Success Response

@@ -1,0 +1,51 @@
+flowchart TD
+
+    A((Client Request))
+
+    A --> B[Validate Shopping List Request]
+
+    B --> C{Validation Passed?}
+
+    C -->|No| D[Return Validation Errors]
+
+    C -->|Yes| E[Start DB Transaction]
+
+    E --> F[Calculate Total Estimated Cost]
+
+    F --> G[Create Shopping List]
+
+    G --> H[Create Shopping Items]
+
+    H --> I{Shopping List Created?}
+
+    I -->|No| J[Rollback Transaction]
+
+    J --> K[Return Error Response]
+
+    I -->|Yes| L[Create Order]
+
+    L --> M[Create Market Source Location]
+
+    M --> N{Client Role}
+
+    N -->|Admin| O[Use Provided Address]
+
+    N -->|Client| P[Load Default Address]
+
+    P --> Q{Default Address Exists?}
+
+    Q -->|No| R[Return Error Response]
+
+    Q -->|Yes| S[Create Delivery Location]
+
+    O --> T[Assign Delivery Location]
+
+    S --> T
+
+    T --> U[Save Order]
+
+    U --> V[Dispatch OrderPlaced Event]
+
+    V --> W[Commit Transaction]
+
+    W --> X((Success Response))

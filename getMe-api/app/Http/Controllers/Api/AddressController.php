@@ -6,11 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressRequest;
 use App\Models\Address;
 use App\Models\User;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Laravel\Mcp\Response;
 
 class AddressController extends Controller
 {
@@ -25,9 +21,10 @@ class AddressController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AddressRequest $request, User $user, Address $address = null)
+    public function store(AddressRequest $request, ?Address $address = null)
     {
-        if (!in_array($user->role, ['client', 'admin'])) {
+        $user = $request->user();
+        if (! in_array($user->role, ['client', 'admin'])) {
             return response()->json(['message' => 'Invalid action'], 403);
         }
 
@@ -60,7 +57,6 @@ class AddressController extends Controller
     {
         //
     }
-    
 
     /**
      * Remove the specified resource from storage.
@@ -69,6 +65,7 @@ class AddressController extends Controller
     {
         return DB::transaction(function () use ($address) {
             Address::delete($address->id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Address deleted',

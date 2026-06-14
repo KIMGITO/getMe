@@ -1,0 +1,25 @@
+flowchart TD
+
+    A((User))
+
+    B[Rider Form]
+
+    C[Client Form]
+
+    SD[(Database)]
+
+    SE([Send Confirmation Email])
+
+    LG((Auto Login User))
+
+    A --> B
+
+    A --> C
+
+    B --> SD
+
+    C --> SD
+
+    SD --> SE
+
+    SE --> LG

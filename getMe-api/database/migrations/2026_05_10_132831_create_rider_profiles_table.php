@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RiderActivityStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +20,9 @@ return new class extends Migration
             $table->string('id_front_path')->nullable();
             $table->string('id_back_path')->nullable();
 
+            // activity status
+            $table->enum('activity_status', array_column(RiderActivityStatus::cases(), 'value'))->default(RiderActivityStatus::STATUS_IDLE->value);
+            // sacco    
             $table->string('sacco_name')->nullable();
             $table->string('sacco_membership_number')->nullable();
 
@@ -38,6 +42,9 @@ return new class extends Migration
             $table->timestamps();
             $table->index('vehicle_plate_number');
             $table->index('sacco_membership_number');
+
+            $table->string('current_order_id')->nullable();
+            $table->timestamp('assigned_at')->nullable();
         });
     }
 

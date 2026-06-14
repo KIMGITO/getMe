@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\RiderGeoService;
+use App\Services\GeoService;
 use Illuminate\Http\Request;
 
 class RiderDispatchController extends Controller
 {
-    public function nearby(Request $request, RiderGeoService $geo)
+    public function nearby(Request $request, GeoService $geo)
     {
         $request->validate([
             'lat' => 'required|numeric',

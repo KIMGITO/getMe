@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Rider;
+use App\Rules\KenyanPhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,20 +31,28 @@ class RegisterUserRequest extends FormRequest
         $canCreateAdmin = $user && $user->role === 'admin';
 
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|regex:/\s/',
             'email' => 'nullable|email|unique:users,email',
-            'phone' => 'required|unique:users,phone',
+            'phone' => ['required','unique:users,phone',new KenyanPhoneNumber('any')],
 
-            'password' => 'nullable|string|min:8',
+            'password' => 'required|string|min:8',
             'pin' => 'nullable|string|digits:4',
 
             'role' => [
-                'nullable',
+                'required',
                 Rule::in(array_merge(
                     ['client', 'rider'],
                     $canCreateAdmin ? ['admin'] : []
                 )),
             ],
+        ];
+    }
+
+
+    public function messages(): array
+    {
+        return [
+            'name.regex' => 'The name must contain at least a first and last name.',
         ];
     }
 

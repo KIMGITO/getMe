@@ -1,0 +1,25 @@
+flowchart TD
+
+START((Client))--->A( creates shopping list) --> B(System calculates approximate cost<br/>Items + Rider fee + Tip)
+
+B --> C{Wallet balance enough?}
+
+C -- Yes --> D(Confirm delivery order)
+D --> E(Reserve funds in wallet)
+E --> F(Create order)
+F --> G(Assign rider)
+G --> H(Order confirmed → process delivery)
+H --> END((End))
+
+C -- No --> I(Show insufficient balance message)
+
+I --> J{Client action}
+
+J -- Top up wallet --> K(Top up wallet)
+K --> B
+
+J -- Reduce shopping list --> L(Edit shopping list)
+L --> B
+
+J -- Reduce tip --> M(Adjust tip amount)
+M --> B

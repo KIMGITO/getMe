@@ -1,0 +1,45 @@
+flowchart TD
+
+    CR{User Type}
+    
+    LP[Login Page]
+    
+    ID[Email / Phone]
+    
+    PW[PIN / Password]
+    
+    SOTP[Send SMS OTP]
+    
+    OTP[Enter OTP]
+    
+    VF{Verify Credentials}
+        
+    CRD{Client or Rider}
+    
+    CDS((Client Dashboard))
+    
+    RDS((Rider Dashboard))
+
+    LP --> ID
+    
+    ID --> CR
+
+    CR -->|Client| SOTP
+    
+    CR -->|Rider| PW
+
+    SOTP --> OTP
+
+    OTP --> VF
+    
+    PW --> VF
+
+    VF -->|Rider Invalid| PW
+    
+    VF -->|Client Invalid| OTP
+
+    VF --> CRD
+
+    CRD -->|Client| CDS
+    
+    CRD -->|Rider| RDS

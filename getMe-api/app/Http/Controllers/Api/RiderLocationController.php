@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rider;
-use App\Services\RiderGeoService;
+use App\Services\GeoService;
 use App\Services\RiderLocationService;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,13 +14,12 @@ class RiderLocationController extends Controller
     // update rider locations
     public function update(Request $request, RiderLocationService $riderLocationService)
     {
-
         $user = $request->user();
 
-        $canAssign = Rider::assignable()->where('user_id', $user->id)->exists();
+        $isProfileUpdated = Rider::assignable()->where('user_id', $user->id)->exists();
 
-        if (! $canAssign) {
-            throw new Exception('Can not assign task: rider is not active');
+        if (! $isProfileUpdated) {
+            throw new Exception('Can not assign task: rider, profile details not provided.');
         }
 
         $validated = $request->validate([
@@ -31,7 +30,8 @@ class RiderLocationController extends Controller
         return $riderLocationService->updateLocation($validated['lat'], $validated['lng'], $user);
     }
 
-    public function nearby(Request $request, RiderGeoService $geo)
+    // nearby  and allocate the nearest
+    public function nearby(Request $request, GeoService $geo)
     {
         $client = $request->user();
 
@@ -69,7 +69,7 @@ class RiderLocationController extends Controller
             ->map(function ($rider) {
                 return [
                     'id' => $rider[0],
-                    'distance' => (float) $rider[1], // ✅ keep numeric
+                    'distance' => (float) $rider[1],
                     'longitude' => $rider[2][0],
                     'latitude' => $rider[2][1],
                 ];
@@ -79,8 +79,6 @@ class RiderLocationController extends Controller
             ->toArray();
 
         $assignedRider = $geo->dispatch($riders, $client);
-        $riderWithLocation = $assignedRider->load('location');
-        $location = $riderWithLocation->location;
 
         if (! $assignedRider) {
             return response()->json([
@@ -89,8 +87,11 @@ class RiderLocationController extends Controller
             ]);
         }
 
+        $riderWithLocation = $assignedRider?->load('location');
+        $location = $riderWithLocation->location;
+
         // remove the rider from the keys and assign new distance
-        // $geo->remove($assignedRider->id);
+        $geo->remove($assignedRider->id);
 
         $geo->deliveryLocation(
             [
@@ -99,7 +100,7 @@ class RiderLocationController extends Controller
                 'id' => $assignedRider->id,
             ],
             [
-                'lat' => -1.236389,
+                'lat' => -1.276389,
                 'lng' => 36.827223,
                 'id' => $client->id,
             ]
@@ -108,9 +109,9 @@ class RiderLocationController extends Controller
         $deliveryDistance = $geo->distance($assignedRider->id, $client->id);
 
         if ($deliveryDistance < 1) {
-            $distanceText = round($deliveryDistance * 1000, 0).' m';
+            $distanceText = round($deliveryDistance * 1000, 0) . ' m';
         } else {
-            $distanceText = round($deliveryDistance, 1).' km';
+            $distanceText = round($deliveryDistance, 1) . ' km';
         }
 
         return response()->json([
@@ -120,7 +121,7 @@ class RiderLocationController extends Controller
                 'id' => $assignedRider->id,
                 'name' => $assignedRider->name,
                 'phone' => $assignedRider->phone ?? '',
-                'vehicle' => $assignedRider->rider->vehicle_type.' '.$assignedRider->rider->vehicle_model,
+                'vehicle' => $assignedRider->rider->vehicle_type . ' ' . $assignedRider->rider->vehicle_model,
                 'vehicle_number' => $assignedRider->rider->vehicle_plate_number,
                 'distance' => $distanceText,
             ],

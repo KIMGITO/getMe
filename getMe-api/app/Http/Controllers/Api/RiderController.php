@@ -13,6 +13,7 @@ class RiderController extends Controller
 {
     public function setupProfile(RiderRequest $request, User $user){
 
+    // rider profile setup
         if($user->role != 'rider'){
             throw new Exception('User is not a registered rider');
         }
