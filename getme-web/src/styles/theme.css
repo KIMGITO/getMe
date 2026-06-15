@@ -198,20 +198,30 @@
 /* ===== Material Design 3 Elevation Base Definitions ===== */
 :root {
   --md-sys-elevation-0: none;
-  --md-sys-elevation-1: 0px 1px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 3px 1px rgba(0, 0, 0, 0.05);
-  --md-sys-elevation-2: 0px 1px 2px 0px rgba(0, 0, 0, 0.08), 0px 2px 6px 2px rgba(0, 0, 0, 0.05);
-  --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.08), 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
-  --md-sys-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.1);
-  --md-sys-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.08), 0px 4px 4px 0px rgba(0, 0, 0, 0.1);
+  --md-sys-elevation-1:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 3px 1px rgba(0, 0, 0, 0.05);
+  --md-sys-elevation-2:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.08), 0px 2px 6px 2px rgba(0, 0, 0, 0.05);
+  --md-sys-elevation-3:
+    0px 4px 8px 3px rgba(0, 0, 0, 0.08), 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  --md-sys-elevation-4:
+    0px 6px 10px 4px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.1);
+  --md-sys-elevation-5:
+    0px 8px 12px 6px rgba(0, 0, 0, 0.08), 0px 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .dark,
 [data-theme='dark'] {
-  --md-sys-elevation-1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-  --md-sys-elevation-2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-  --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
-  --md-sys-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.3);
-  --md-sys-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-1:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-2:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-3:
+    0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-4:
+    0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-5:
+    0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3);
 }
 
 /* ========================================
@@ -232,17 +242,23 @@
   --color-primary-fixed: rgb(var(--md-sys-color-primary-fixed));
   --color-on-primary-fixed: rgb(var(--md-sys-color-on-primary-fixed));
   --color-primary-fixed-dim: rgb(var(--md-sys-color-primary-fixed-dim));
-  --color-on-primary-fixed-variant: rgb(var(--md-sys-color-on-primary-fixed-variant));
+  --color-on-primary-fixed-variant: rgb(
+    var(--md-sys-color-on-primary-fixed-variant)
+  );
 
   /* ===== Secondary ===== */
   --color-secondary: rgb(var(--md-sys-color-secondary));
   --color-on-secondary: rgb(var(--md-sys-color-on-secondary));
   --color-secondary-container: rgb(var(--md-sys-color-secondary-container));
-  --color-on-secondary-container: rgb(var(--md-sys-color-on-secondary-container));
+  --color-on-secondary-container: rgb(
+    var(--md-sys-color-on-secondary-container)
+  );
   --color-secondary-fixed: rgb(var(--md-sys-color-secondary-fixed));
   --color-on-secondary-fixed: rgb(var(--md-sys-color-on-secondary-fixed));
   --color-secondary-fixed-dim: rgb(var(--md-sys-color-secondary-fixed-dim));
-  --color-on-secondary-fixed-variant: rgb(var(--md-sys-color-on-secondary-fixed-variant));
+  --color-on-secondary-fixed-variant: rgb(
+    var(--md-sys-color-on-secondary-fixed-variant)
+  );
 
   /* ===== Tertiary ===== */
   --color-tertiary: rgb(var(--md-sys-color-tertiary));
@@ -252,7 +268,9 @@
   --color-tertiary-fixed: rgb(var(--md-sys-color-tertiary-fixed));
   --color-on-tertiary-fixed: rgb(var(--md-sys-color-on-tertiary-fixed));
   --color-tertiary-fixed-dim: rgb(var(--md-sys-color-tertiary-fixed-dim));
-  --color-on-tertiary-fixed-variant: rgb(var(--md-sys-color-on-tertiary-fixed-variant));
+  --color-on-tertiary-fixed-variant: rgb(
+    var(--md-sys-color-on-tertiary-fixed-variant)
+  );
 
   /* ===== Error ===== */
   --color-error: rgb(var(--md-sys-color-error));
@@ -283,11 +301,17 @@
   --color-on-surface: rgb(var(--md-sys-color-on-surface));
   --color-surface-variant: rgb(var(--md-sys-color-surface-variant));
   --color-on-surface-variant: rgb(var(--md-sys-color-on-surface-variant));
-  --color-surface-container-lowest: rgb(var(--md-sys-color-surface-container-lowest));
+  --color-surface-container-lowest: rgb(
+    var(--md-sys-color-surface-container-lowest)
+  );
   --color-surface-container-low: rgb(var(--md-sys-color-surface-container-low));
   --color-surface-container: rgb(var(--md-sys-color-surface-container));
-  --color-surface-container-high: rgb(var(--md-sys-color-surface-container-high));
-  --color-surface-container-highest: rgb(var(--md-sys-color-surface-container-highest));
+  --color-surface-container-high: rgb(
+    var(--md-sys-color-surface-container-high)
+  );
+  --color-surface-container-highest: rgb(
+    var(--md-sys-color-surface-container-highest)
+  );
   --color-surface-bright: rgb(var(--md-sys-color-surface-bright));
   --color-surface-dim: rgb(var(--md-sys-color-surface-dim));
   --color-surface-tint: rgb(var(--md-sys-color-surface-tint));
@@ -610,7 +634,7 @@
     cursor: not-allowed;
   }
 
- *::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     display: none;
   }
 
@@ -679,7 +703,7 @@
     transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
     border: 1px solid rgb(var(--md-sys-color-outline-variant) / 0.5);
   }
-  
+
   .stats-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--md-sys-elevation-2);
@@ -852,11 +876,11 @@
     font-weight: 500;
     line-height: 1;
   }
-  
+
   button {
     cursor: pointer;
   }
-  
+
   .badge-primary {
     background-color: rgb(var(--md-sys-color-primary-container));
     color: rgb(var(--md-sys-color-on-primary-container));
@@ -971,6 +995,19 @@
     position: relative;
   }
 
+  /* Target WebKit Browsers (Chrome, Safari, Edge, Opera) */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Target Mozilla Firefox */
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
   .tooltip::before {
     content: attr(data-tooltip);
     position: absolute;
@@ -997,26 +1034,54 @@
 
 /* ===== Animation Keyframes ===== */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes rotate-in {
-  from { transform: rotate(-180deg); opacity: 0; }
-  to { transform: rotate(0); opacity: 1; }
+  from {
+    transform: rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0);
+    opacity: 1;
+  }
 }

@@ -23,10 +23,8 @@ class LedgerPoster
     public function post(TransactionData $data, array $journalLines): Transaction
     {
         return DB::transaction(function () use ($data, $journalLines) {
-            // 1. Create transaction record
             $transaction = $this->createTransaction($data);
             
-            // 2. Create payment intent if needed
             if ($data->gateway) {
                 $this->createPaymentIntent($transaction, $data);
             }
@@ -52,6 +50,7 @@ class LedgerPoster
         return Transaction::create([
             'reference_id' => $data->referenceId,
             'type' => $data->type,
+            'amount' => $data->amount,
             'status' => $data->status,
             'metadata' => json_encode($data->metadata)
         ]);

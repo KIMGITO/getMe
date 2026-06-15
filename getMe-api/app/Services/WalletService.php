@@ -38,7 +38,7 @@ class WalletService
         }
 
         // Generate unique reference
-        $reference = 'WALLET-' . strtoupper(uniqid());
+        $reference = 'Get Me Wallet';
 
         // Broadcast: Initiation started
         MpesaTransactionUpdated::broadcast(
@@ -201,7 +201,7 @@ class WalletService
 
         return [
             'success' => true,
-            'balance' => $wallet->cached_balance,
+            'total_assest' => $wallet->cached_balance,
             'held_balance' => $wallet->cached_held_balance,
             'currency' => $wallet->currency,
             'available_balance' => $wallet->cached_balance - $wallet->cached_held_balance

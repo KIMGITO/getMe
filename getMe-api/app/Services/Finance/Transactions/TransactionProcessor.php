@@ -65,6 +65,7 @@ class TransactionProcessor
             $transaction = Transaction::create([
                 'id' => (string) Str::ulid(),
                 'reference_id' => $receiptNumber,
+                'amount' => $amount,
                 'type' => TransactionType::DEPOSIT,
                 'status' => TransactionStatus::COMPLETED,
                 'metadata' => json_encode($stkCallback)
@@ -191,6 +192,7 @@ class TransactionProcessor
             $transaction = Transaction::create([
                 'id' => (string) Str::ulid(),
                 'reference_id' => $orderId,
+                'amount' => $amount,
                 'type' => TransactionType::PAYMENT,
                 'status' => TransactionStatus::COMPLETED,
                 'metadata' => json_encode($metadata)
@@ -268,6 +270,7 @@ class TransactionProcessor
             $transaction = Transaction::create([
                 'id' => (string) Str::ulid(),
                 'reference_id' => $orderId,
+                'amount' => $amount,
                 'type' => TransactionType::WITHDRAWAL,
                 'status' => TransactionStatus::COMPLETED,
                 'metadata' => json_encode($metadata)
@@ -350,6 +353,7 @@ class TransactionProcessor
             $transaction = Transaction::create([
                 'id' => (string) Str::ulid(),
                 'reference_id' => $orderId,
+                'amount' =>  $amount,
                 'type' => TransactionType::TRANSFER,
                 'status' => TransactionStatus::COMPLETED,
                 'metadata' => json_encode(['action' => 'release_escrow'])

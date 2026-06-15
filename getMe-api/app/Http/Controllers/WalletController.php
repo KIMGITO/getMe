@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FundWalletRequest;
 use App\Http\Requests\WithdrawRequest;
+use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 
@@ -47,9 +48,10 @@ class WalletController extends Controller
     /**
      * Get wallet balance
      */
-    public function balance(Request $request, WalletService $walletService)
+    public function balance(Request $request, User $user, WalletService $walletService)
     {
-        $userId = $request->user()->id;
+        $userId = $user->id;
+        
         
         $response = $walletService->getBalance($userId);
         

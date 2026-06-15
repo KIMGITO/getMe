@@ -15,3 +15,22 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
 }
+
+export type TransactionTypes =
+  | 'deposit'
+  | 'payment'
+  | 'transfer'
+  | 'payment'
+  | 'withdrawal'
+  | 'chargedback'
+  | 'reversal';
+
+export type TransactionStatus = 
+    'completed'
+    | 'pending'
+    | 'failed'
+    | 'timeout'
+    | 'reversed'
+    | 'refunded'
+    | 'settled'
+    | 'disputed';

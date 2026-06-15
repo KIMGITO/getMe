@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://127.0.0.1:8000/api/v1';
+export const BASE_URL = 'https://352f-41-139-133-135.ngrok-free.app/api/v1';
 
 export const ROUTES = {
   LANDING: '/',
@@ -19,7 +19,6 @@ export const ROUTES = {
   CLIENT_HOME: '/client/home',
   RIDER_HOME: '/rider/home',
   ADMIN_HOME: '/admin/home',
-
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
@@ -53,7 +52,8 @@ export const routeMessages: Record<RoutePath, string> = {
   [ROUTES.CART]: 'Review your cart before checkout.',
   [ROUTES.CHECKOUT]: 'Almost there! Complete your purchase.',
   [ROUTES.ACCOUNT]: 'Manage your account details and preferences.',
-  [ROUTES.WALLET]: 'Monitor your transactional statements and available balance tokens.',
+  [ROUTES.WALLET]:
+    'Monitor your transactional statements and available balance tokens.',
   [ROUTES.LOGIN]: 'Welcome back! Please log in to continue.',
   [ROUTES.LOGIN_INIT]: 'Enter your phone number or email to get started.',
   [ROUTES.SIGNUP]: 'Join GetME today and start shopping!',

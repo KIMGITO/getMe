@@ -53,6 +53,10 @@ export default function Navigation() {
 
   const { user } = useAuthStore();
 
+  const  logOut = () => {
+    useAuthStore.getState().logout();
+  }
+
   return (
     <>
       <div className="bg-surface border-b border-outline-variant px-4 py-3 sticky top-0 z-50 shadow-sm">
@@ -136,6 +140,8 @@ export default function Navigation() {
             )}
           </div>
 
+
+
           {/* Configuration Panel Cluster */}
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -145,7 +151,7 @@ export default function Navigation() {
               <BiSearch size={20} />
             </button>
 
-            <button className="relative text-on-surface-variant hover:text-primary p-2">
+            <button className="relative text-on-surface-variant hover:text-primary p-2" onClick={logOut}>
               <BiBell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
             </button>
@@ -188,9 +194,11 @@ export default function Navigation() {
               to={ROUTES.ACCOUNT || '/profile'}
               className="lg:hidden shrink-0"
             >
-              <div className="w-8 h-8 bg-primary-container font-bold text-primary text-xs flex items-center justify-center rounded-full">
-                DK
-              </div>
+               <Avatar
+                name={user?.name}
+                size="md"
+                src={`https://plus.unsplash.com/premium_photo-1732757787588-29df717691f4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGF2YXRhciUyMGNhcnRvb258ZW58MHx8MHx8fDA%3D`}
+              />
             </Link>
           </div>
         </div>

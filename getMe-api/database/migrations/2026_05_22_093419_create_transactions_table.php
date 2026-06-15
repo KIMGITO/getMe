@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('reference_id');
+            $table->string('transaction_code')->nullable()->unique();
+            $table->decimal('amount', 10, 2);
             $table->enum('type',  array_column(TransactionType::cases(), 'value'));
             $table->enum('status', array_column(TransactionStatus::cases(), 'value'))->default(TransactionStatus::PENDING->value);
             $table->json('metadata')->nullable();

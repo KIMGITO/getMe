@@ -9,7 +9,7 @@ interface LocationState {
 
 export function useCurrentLocation() {
   const [location, setLocation] = useState<LocationState>({
-    city: 'Nairobi', // Standard fallback baseline
+    city: 'Nairobi', 
     country: 'Kenya',
     loading: true,
     error: false,

@@ -51,5 +51,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/shopping-list', [ShoppingListController::class, 'store'])->name('shoppingList.store');
 
-    Route::post('/wallet/fund', [WalletController::class, 'fund'])->name('wallet.fund');
+    Route::prefix('wallet')->name('wallet.')->group(function () {
+        Route::post('/fund', [WalletController::class, 'fund'])->name('fund');
+        Route::get('/balance/{user}', [WalletController::class, 'balance'])->name('balance');
+
+    })  ;
 });
