@@ -48,7 +48,7 @@ class GeoService
     /**
      * Rider state management
      */
-    public function setStatus(string $riderId, string $status)
+    public function setStatus(string $riderId, RiderActivityStatus $status)
     {
             $allowedStatuses = [
                 RiderActivityStatus::STATUS_IDLE,

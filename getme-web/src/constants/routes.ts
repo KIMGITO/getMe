@@ -1,65 +1,66 @@
-export const BASE_URL = 'https://352f-41-139-133-135.ngrok-free.app/api/v1';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL; 
 
 export const ROUTES = {
   LANDING: '/',
-  PRODUCTS: '/products',
-  PRODUCT_DETAIL: '/products/:id',
-  SHOPPINGLIST: '/orders',
-  CART: '/cart',
-  CHECKOUT: '/checkout',
-  ACCOUNT: '/profile',
-  WALLET: '/wallet',
+
+  // auth routes
   LOGIN_INIT: '/login/init',
   LOGIN: '/login',
   SIGNUP: '/signup',
   OTP: '/otp',
   PASSWORD: '/password',
-  HOME: '/home',
 
+  // market routes
+  SHOPPING_LIST: '/orders',
+
+  // client routes
   CLIENT_HOME: '/client/home',
-  RIDER_HOME: '/rider/home',
-  ADMIN_HOME: '/admin/home',
-} as const;
+  CLIENT_PROFILE: '/client/profile',
 
-export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
+  // rider routes
+  RIDER_HOME: '/rider/home',
+  RIDER_PROFILE: '/rider/profile',
+
+  // admin routes
+  ADMIN_HOME: '/admin/home',
+  ADMIN_PROFILE: '/admin/profile',
+
+  // shared routes
+  WALLET: '/wallet',
+} as const;  
+
+export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES]; 
 
 export const routeTitles: Record<RoutePath, string> = {
-  [ROUTES.HOME]: 'Home',
-  [ROUTES.LANDING]: 'Welcome',
-  [ROUTES.PRODUCTS]: 'Products',
-  [ROUTES.PRODUCT_DETAIL]: 'Product Detail',
-  [ROUTES.SHOPPINGLIST]: 'My Orders',
-  [ROUTES.CART]: 'Shopping Cart',
-  [ROUTES.CHECKOUT]: 'Checkout Address',
-  [ROUTES.ACCOUNT]: 'Profile Settings',
-  [ROUTES.WALLET]: 'Wallet Balance',
-  [ROUTES.LOGIN]: 'Log In',
-  [ROUTES.LOGIN_INIT]: 'Get Started',
-  [ROUTES.SIGNUP]: 'Register Account',
-  [ROUTES.OTP]: 'Verify Security OTP',
-  [ROUTES.PASSWORD]: 'Reset Password',
-  [ROUTES.CLIENT_HOME]: 'Client Terminal',
-  [ROUTES.RIDER_HOME]: 'Rider Command',
-  [ROUTES.ADMIN_HOME]: 'Admin Engine',
+  [ROUTES.LANDING]: 'Welcome', 
+  [ROUTES.LOGIN_INIT]: 'Get Started', 
+  [ROUTES.LOGIN]: 'Log In', 
+  [ROUTES.SIGNUP]: 'Register Account', 
+  [ROUTES.OTP]: 'Verify Security OTP', 
+  [ROUTES.PASSWORD]: 'Reset Password', 
+  [ROUTES.SHOPPINGLIST]: 'My Orders', 
+  [ROUTES.CLIENT_HOME]: 'Client Terminal', 
+  [ROUTES.CLIENT_PROFILE]: 'Client Profile Settings',
+  [ROUTES.RIDER_HOME]: 'Rider Command', 
+  [ROUTES.RIDER_PROFILE]: 'Rider Portal Profile',
+  [ROUTES.ADMIN_HOME]: 'Admin Engine', 
+  [ROUTES.ADMIN_PROFILE]: 'Admin Infrastructure Matrix',
+  [ROUTES.WALLET]: 'Wallet Balance', 
 };
 
 export const routeMessages: Record<RoutePath, string> = {
-  [ROUTES.HOME]: 'Welcome to GetME!',
-  [ROUTES.LANDING]: 'Experience the future of local shopping with GetME.',
-  [ROUTES.PRODUCTS]: 'Browse our wide selection of fresh groceries.',
-  [ROUTES.PRODUCT_DETAIL]: 'Discover more about this product.',
-  [ROUTES.SHOPPINGLIST]: 'Your shopping list is ready to go!',
-  [ROUTES.CART]: 'Review your cart before checkout.',
-  [ROUTES.CHECKOUT]: 'Almost there! Complete your purchase.',
-  [ROUTES.ACCOUNT]: 'Manage your account details and preferences.',
-  [ROUTES.WALLET]:
-    'Monitor your transactional statements and available balance tokens.',
-  [ROUTES.LOGIN]: 'Welcome back! Please log in to continue.',
-  [ROUTES.LOGIN_INIT]: 'Enter your phone number or email to get started.',
-  [ROUTES.SIGNUP]: 'Join GetME today and start shopping!',
-  [ROUTES.OTP]: 'Enter the OTP sent to your device to verify your account.',
-  [ROUTES.PASSWORD]: 'Reset your password to regain access to your account.',
-  [ROUTES.CLIENT_HOME]: 'Welcome to Your Dashboard',
-  [ROUTES.RIDER_HOME]: 'Welcome to Your Logistics Hub',
-  [ROUTES.ADMIN_HOME]: 'System Management Engine Portal',
+  [ROUTES.LANDING]: 'Experience the future of local shopping with GetME.', 
+  [ROUTES.LOGIN_INIT]: 'Enter your phone number or email to get started.', 
+  [ROUTES.LOGIN]: 'Welcome back! Please log in to continue.', 
+  [ROUTES.SIGNUP]: 'Join GetME today and start shopping!', 
+  [ROUTES.OTP]: 'Enter the OTP sent to your device to verify your account.', 
+  [ROUTES.PASSWORD]: 'Reset your password to regain access to your account.', 
+  [ROUTES.SHOPPINGLIST]: 'Your shopping list is ready to go!', 
+  [ROUTES.CLIENT_HOME]: 'Welcome to Your Dashboard', 
+  [ROUTES.CLIENT_PROFILE]: 'Manage your individual client profile records.',
+  [ROUTES.RIDER_HOME]: 'Welcome to Your Logistics Hub', 
+  [ROUTES.RIDER_PROFILE]: 'Review and update your dispatch criteria variables.',
+  [ROUTES.ADMIN_HOME]: 'System Management Engine Portal', 
+  [ROUTES.ADMIN_PROFILE]: 'Superuser administrative system panel access override controls.',
+  [ROUTES.WALLET]: 'Monitor your transactional statements and available balance tokens.', 
 };

@@ -20,9 +20,16 @@ Route::post('/auth/register', [AuthController::class, 'register'])->name('regist
 Route::post('/mpesa/stk-callback', function (Request $request) {
     $mpesaService = app(\App\Services\Finance\MpesaService::class);
     $processor = app(\App\Services\Finance\Transactions\TransactionProcessor::class);
-
     return $mpesaService->stkCallback($request->all(), $processor);
 });
+
+Route::post('/mpesa/b2c-result', function (Request $request) {
+    $mpesaService = app(\App\Services\Finance\MpesaService::class);
+    $processor = app(\App\Services\Finance\Transactions\TransactionProcessor::class);
+    return $mpesaService->b2cCallback($request->all(), $processor);
+});
+
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -31,11 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::prefix('riders')->name('riders.')->group(function () {
-        Route::post('/{user}/profile', [RiderController::class, 'setupProfile'])->name('profile.update');
-
+        Route::post('/profile', [RiderController::class, 'setupProfile'])->name('profile.update');
         // rider location
         Route::post('/location', [RiderLocationController::class, 'update'])->name('location.update');
         Route::post('/nearby', [RiderLocationController::class, 'nearby'])->name('nearby');
+        Route::get('/verification-status', [RiderController::class, 'verificationStatus'])->name('verificationStatus');
     });
 
     Route::prefix('clients')->name('clients.')->group(function () {
@@ -53,7 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('wallet')->name('wallet.')->group(function () {
         Route::post('/fund', [WalletController::class, 'fund'])->name('fund');
+        Route::post('/withdraw', [WalletController::class, 'withdraw'])->name('withdraw');
         Route::get('/balance/{user}', [WalletController::class, 'balance'])->name('balance');
+        Route::get('/transactions/{user}', [WalletController::class, 'transactions'])->name('transactions');
 
     })  ;
 });

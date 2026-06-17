@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
     'is_blacklisted',
     'suspension_reason',
     'is_verified',
+    'is_waiting_verification',
     'current_order_id',
     'assigned_at'
 ])]
@@ -38,9 +39,11 @@ class Rider extends Model
     protected $casts = [
         'id_number' => 'encrypted',
         'is_verified' => 'boolean',
+        'is_active' => 'boolean',
+        'is_waiting_verification' => 'boolean',
         'is_suspended' => 'boolean',
         'is_blacklisted' => 'boolean',
-        'activity_staus' => RiderActivityStatus::class,
+        'activity_status' => RiderActivityStatus::class,
     ];
 
     public function user()

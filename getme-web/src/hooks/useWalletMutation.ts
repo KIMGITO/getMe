@@ -11,7 +11,7 @@ export function useWalletMutation({
   availableBalance,
   onSuccessClose,
 }: UseWalletMutationProps) {
-  const [phone, setPhone] = useState( '254');
+  const [phone, setPhone] = useState('254');
   const [amount, setAmount] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export function useWalletMutation({
   const executeTransaction = (type: 'topup' | 'withdraw') => {
     setValidationError(null);
 
-  const phoneRegex = /^(?:254[1-9]\d{8}|0[17]\d{8})$/;
+    const phoneRegex = /^(?:254[1-9]\d{8}|0[17]\d{8})$/;
     if (!phoneRegex.test(phone)) {
       setValidationError(
         'Provide a valid Kenyan safaricom registered number format start with 254 , 07 or 01',
@@ -46,9 +46,9 @@ export function useWalletMutation({
         return;
       }
     } else if (type === 'withdraw') {
-      if (isNaN(numericAmount) || numericAmount < 10 || numericAmount > 50000) {
+      if (isNaN(numericAmount) || numericAmount < 1 || numericAmount > 50000) {
         setValidationError(
-          'M-Pesa channel payout limits require values between Ksh 10 and Ksh 50,000.',
+          'M-Pesa channel payout limits require values between Ksh 1 and Ksh 50,000.',
         );
         return;
       }
@@ -62,24 +62,45 @@ export function useWalletMutation({
 
     try {
       setLoading(true);
-      return  walletServices.topup(numericAmount, phone).then((res) => {
-        setLoading(false);
-        if (res.success === false) {
-          setValidationError(res.message);
-        } else {
-          
-          onSuccessClose();
-          resetForm();
-          setSuccess(true);
-        }
+      return type === 'topup'
+        ? walletServices
+            .topup(numericAmount, phone)
+            .then((res) => {
+              setLoading(false);
+              if (res.success === false) {
+                setValidationError(res.message);
+              } else {
+                onSuccessClose();
+                resetForm();
+                setSuccess(true);
+              }
 
-        return res;
-      });
+              return res;
+            })
+            .finally(() => {
+              setLoading(false);
+            })
+        : walletServices
+            .withdraw(numericAmount, phone)
+            .then((res) => {
+              setLoading(false);
+              if (res.success === false) {
+                setValidationError(res.message);
+              } else {
+                onSuccessClose();
+                resetForm();
+                setSuccess(true);
+              }
 
+              return res;
+            })
+            .finally(() => {
+              setLoading(false);
+            });
     } catch (err: any) {
       setLoading(false);
       setValidationError(err.message);
-      return  err;
+      return err;
     }
   };
 

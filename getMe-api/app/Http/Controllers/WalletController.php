@@ -31,7 +31,7 @@ class WalletController extends Controller
     /**
      * Withdraw from wallet to M-Pesa
      */
-    public function withdraw(WithdrawRequest $request, WalletService $walletService)
+    public function withdraw(FundWalletRequest $request, WalletService $walletService)
     {
         $userId = $request->user()->id;
         $validated = $request->validated();
@@ -64,7 +64,7 @@ class WalletController extends Controller
     public function transactions(Request $request, WalletService $walletService)
     {
         $userId = $request->user()->id;
-        $limit = $request->get('limit', 50);
+        $limit = $request->input('limit', 5);
         
         $response = $walletService->getTransactionHistory($userId, $limit);
         

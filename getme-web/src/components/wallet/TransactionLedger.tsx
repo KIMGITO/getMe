@@ -1,6 +1,8 @@
+import { formatDateDMY } from '@/helpers/dates';
 import { TransactionLog } from '@/services/walletServices';
 import React from 'react';
 import { BiHistory } from 'react-icons/bi';
+import Button from '../UI/Button';
 
 
 
@@ -9,6 +11,11 @@ interface TransactionLedgerProps {
 }
 
 export const TransactionLedger: React.FC<TransactionLedgerProps> = ({ history }) => {
+
+  const loadMoreTransactions = () => {
+    
+  };
+
   return (
     <div className="border border-outline-variant bg-surface-container-lowest rounded-3xl p-6 space-y-4">
       <div className="flex items-center gap-2 border-b border-outline-variant pb-3 text-on-surface-variant">
@@ -32,10 +39,10 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({ history })
                   {tx.type === 'payment' && 'Order Payment'}
                   {tx.type === 'withdrawal' && 'Cashout Outflow'}
                 </span>
-                <span className="font-mono text-xs text-on-surface-variant tracking-wider">{tx.reference}</span>
+                <span className="font-mono text-xs text-on-surface-variant tracking-wider">{tx.transaction_code}</span>
               </div>
               <p className="text-xs font-medium text-on-surface">{tx.description}</p>
-              <p className="text-[11px] text-on-surface-variant">{tx.date}</p>
+              <p className="text-[11px] text-on-surface-variant">Date: {formatDateDMY(tx.created_at)}</p>
             </div>
             
             <div className="text-right">
@@ -48,6 +55,10 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({ history })
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="flex items-center justify-center">
+        <Button onClick={loadMoreTransactions} variant='text' className='text-primary hover:text-secondary'>Load More</Button>
       </div>
     </div>
   );

@@ -41,10 +41,11 @@ class WalletService
         $reference = 'Get Me Wallet';
 
         // Broadcast: Initiation started
-        MpesaTransactionUpdated::broadcast(
-            userId: $userId,
-            message: 'Initiating M-Pesa payment request...'
-        );
+        // MpesaTransactionUpdated::broadcast(
+        //     userId: $userId,
+        //     message: 'Initiating M-Pesa payment request...',
+        //     success: true
+        // );
 
         // Initiate M-Pesa STK Push
         $response = $this->mpesaService->mpesaStkPush(
@@ -59,7 +60,8 @@ class WalletService
             // Broadcast: Failure
             MpesaTransactionUpdated::broadcast(
                 userId: $userId,
-                message: 'Failed to initiate M-Pesa payment. Please try again.'
+                message: 'Failed to initiate M-Pesa payment. Please try again.',
+                success: false
             );
 
             return [
@@ -71,7 +73,8 @@ class WalletService
         // Broadcast: Success - waiting for PIN
         // MpesaTransactionUpdated::broadcast(
         //     userId: $userId,
-        //     message: 'STK Push sent! Please check your phone and enter your PIN to complete payment.'
+        //     message: 'STK Push sent! Please check your phone and enter your PIN to complete payment.',
+        //     success: true
         // );
 
         return [
@@ -100,7 +103,8 @@ class WalletService
         if ($wallet->cached_balance < $amount) {
             MpesaTransactionUpdated::broadcast(
                 userId: $userId,
-                message: 'Insufficient balance for withdrawal'
+                message: 'Insufficient balance for withdrawal',
+                success: false
             );
 
             return [
@@ -121,12 +125,14 @@ class WalletService
         // Broadcast: Withdrawal initiated
         MpesaTransactionUpdated::broadcast(
             userId: $userId,
-            message: "Initiating withdrawal of {$amount} KES to {$phoneNumber}..."
+            message: "Initiating withdrawal of {$amount} KES to {$phoneNumber}...",
+            success: true
         );
 
         // Initiate B2C withdrawal
         $response = $this->mpesaService->b2cWithdrawal(
-            phone: $phoneNumber,
+            // phone: $phoneNumber,
+            phone: '254708374149',
             amount: $amount,
             userId: $userId,
             reason: 'Wallet withdrawal'
@@ -135,7 +141,8 @@ class WalletService
         if ($response === false) {
             MpesaTransactionUpdated::broadcast(
                 userId: $userId,
-                message: 'Withdrawal failed. Please try again.'
+                message: 'Withdrawal failed. Please try again.',
+                success: false
             );
 
             return [
@@ -143,11 +150,6 @@ class WalletService
                 'message' => 'Failed to process withdrawal. Please try again.'
             ];
         }
-
-        MpesaTransactionUpdated::broadcast(
-            userId: $userId,
-            message: "Withdrawal request of {$amount} KES sent successfully. Funds will be sent to {$phoneNumber}."
-        );
 
         return [
             'success' => true,

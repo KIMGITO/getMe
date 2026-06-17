@@ -8,8 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  // ✅ Selector patterns guarantee React tracks updates dynamically
-  const user = useAuthStore((state) => state.user);
+  const { user, isRider, isAdmin } = useAuthStore((state) => state);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -42,14 +41,27 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   // Safe Check: If hydration finished and we truly lack a session, bounce to auth start
   if (!isAuthenticated || !user) {
-    console.warn('ProtectedRoute: Session unauthenticated. Blocking node entry.');
+    console.warn(
+      'ProtectedRoute: Session unauthenticated. Blocking node entry.',
+    );
     return <Navigate to={ROUTES.LOGIN_INIT} replace />;
   }
 
   // Authorization Check: Match user role array access parameters
   if (allowedRoles && !allowedRoles.includes(user.role as any)) {
     console.warn(`ProtectedRoute: Access denied for role "${user.role}".`);
-    return <Navigate to={ROUTES.CLIENT_HOME} replace />;
+    return (
+      <Navigate
+        to={
+          isRider
+            ? ROUTES.RIDER_HOME
+            : isAdmin
+              ? ROUTES.ADMIN_HOME
+              : ROUTES.CLIENT_HOME
+        }
+        replace
+      />
+    );
   }
 
   return <Outlet />;

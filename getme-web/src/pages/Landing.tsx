@@ -18,7 +18,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 export default function LandingPage() {
 
-  const {isAuthenticated} = useAuthStore();
+  const { isAuthenticated, isRider, isClient } = useAuthStore();
   const serviceCategories = [
     {
       icon: groceries,
@@ -55,7 +55,7 @@ export default function LandingPage() {
           <h1 className="display-heavy-sm text-center md:display-heavy-md lg:display-heavy text-on-surface">
             Don't go out
             <br />
-            <p className='text-secondary'>We'll handle it</p>
+            <p className="text-secondary">We'll handle it</p>
             <br />
             <span className="text-primary bg-primary/5 px-3 rounded-2xl">
               GetME
@@ -69,16 +69,17 @@ export default function LandingPage() {
           </p>
 
           {/* Action Hub */}
-        { !isAuthenticated && <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
-            <SignupButton className="!px-10 !py-4 text-base font-black shadow-elevation-3 shadow-primary/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all" />
-            <Link
-              to={ROUTES.LOGIN_INIT}
-              className="px-10 py-4 border-2 border-outline rounded-full text-sm font-black text-center bg-surface hover:bg-surface-container-low transition-colors"
-            >
-              Sign In
-            </Link>
-          </div>
-}
+          {!isAuthenticated && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
+              <SignupButton className="!px-10 !py-4 text-base font-black shadow-elevation-3 shadow-primary/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all" />
+              <Link
+                to={ROUTES.LOGIN_INIT}
+                className="px-10 py-4 border-2 border-outline rounded-full text-sm font-black text-center bg-surface hover:bg-surface-container-low transition-colors"
+              >
+                Sign In
+              </Link>
+            </div>
+          )}
           {/* Marketing Trust Benchmarks */}
           <div className="grid grid-cols-3 gap-6 pt-8 border-t border-outline-variant max-w-md">
             <div>
@@ -224,12 +225,31 @@ export default function LandingPage() {
             Set up your deployment workspace wallet profile and delegate your
             local errands under two minutes.
           </p>
-          <Link
-            to={ROUTES.SIGNUP}
-            className="bg-surface text-on-surface px-10 py-4 rounded-full font-black text-sm tracking-wide shadow-elevation-2 hover:bg-surface-container-high transition-all transform hover:scale-[1.03]"
-          >
-            Create Your Account Natively
-          </Link>
+
+          {isAuthenticated ? (
+            isRider ? (
+              <Link
+                to={ROUTES.RIDER_HOME}
+                className="bg-surface text-on-surface px-10 py-4 rounded-full font-black text-sm tracking-wide shadow-elevation-2 hover:bg-surface-container-high transition-all transform hover:scale-[1.03]"
+              >
+                Ride & earn with GetME
+              </Link>
+            ) : (
+              <Link
+                to={ROUTES.CLIENT_HOME}
+                className="bg-surface text-on-surface px-10 py-4 rounded-full font-black text-sm tracking-wide shadow-elevation-2 hover:bg-surface-container-high transition-all transform hover:scale-[1.03]"
+              >
+                Create your Shopping List
+              </Link>
+            )
+          ) : (
+            <Link
+              to={ROUTES.SIGNUP}
+              className="bg-surface text-on-surface px-10 py-4 rounded-full font-black text-sm tracking-wide shadow-elevation-2 hover:bg-surface-container-high transition-all transform hover:scale-[1.03]"
+            >
+              Create Your Account Natively
+            </Link>
+          )}
         </div>
       </section>
 

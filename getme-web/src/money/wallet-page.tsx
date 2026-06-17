@@ -1,84 +1,74 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
-import { TransactionLog, walletServices } from '@/services/walletServices';
+import { walletServices } from '@/services/walletServices';
 import { WalletStats } from '@/components/wallet/WalletStats';
-import {
-  TransactionLedger,
-} from '@/components/wallet/TransactionLedger';
+import { TransactionLedger } from '@/components/wallet/TransactionLedger';
 import { MpesaModal } from '@/components/wallet/MpesaModal';
 import { WalletSkeleton } from '@/components/UI/skeleton/WalletSkeleton';
-
-const DUMMY_HISTORY: TransactionLog[] = [
-  {
-    id: '1',
-    reference: 'NLK83JD72S',
-    type: 'deposit',
-    amount: 1500,
-    date: '2026-06-11 14:22',
-    status: 'completed',
-    description: 'M-Pesa Deposit',
-  },
-  {
-    id: '2',
-    reference: 'NLM29DH83K',
-    type: 'transfer',
-    amount: -1250,
-    date: '2026-06-11 11:05',
-    status: 'pending',
-    description: 'Held for Order #4412',
-  },
-  {
-    id: '3',
-    reference: 'NLM29DH829',
-    type: 'payment',
-    amount: -420,
-    date: '2026-06-10 09:15',
-    status: 'completed',
-    description: 'Delivery Rider Fee',
-  },
-  {
-    id: '4',
-    reference: 'NLN45GG21P',
-    type: 'withdrawal',
-    amount: -500,
-    date: '2026-06-08 10:12',
-    status: 'completed',
-    description: 'M-Pesa B2C Payout',
-  },
-];
+import { useConnectionStatus, useEcho } from '@laravel/echo-react';
+import { useToastStore } from '@/stores/useToastStore';
+import LedgerSkeleton from '@/components/UI/skeleton/LedgerSkeleton';
 
 export default function WalletPage() {
   const [modalMode, setModalMode] = useState<'topup' | 'withdraw' | null>(null);
   const { user } = useAuthStore();
+  const connectionStatus = useConnectionStatus();
+  const queryClient = useQueryClient();
+  const toast = useToastStore((state) => state.toast);
 
-  const { data: serverBalance, isLoading } = useQuery({
+  const { data: serverBalance, isLoading: isLoadingBalance } = useQuery({
     queryKey: ['wallet-balance', user?.id],
     queryFn: () => walletServices.balance(user!.id),
     enabled: !!user?.id,
   });
 
-  const { data: transactions_logs, isLoading: isLoadingTransactions } = useQuery({
+  const { data:transactions_logs , isLoading: isLoadingTransactions } = useQuery({
     queryKey: ['wallet-transactions', user?.id],
     queryFn: () => walletServices.transactionsLog(user!.id),
     enabled: !!user?.id,
   });
 
+  useEcho(
+    user?.id ? `mpesa.transaction.status.changed.user.${user.id}` : '',
+    '.mpesaTransactionUpdated',
+    (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['wallet-transactions', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['wallet-balance', user?.id] });
 
-  // Structural skeleton loader layer while network operations handle sync requests
-  if (isLoading ) {
+      toast({
+        message: data.message,
+        variant: data.success ? 'info' : 'error',
+        position: data.success ? 'bottom-right' : 'top-center',
+        duration: 5000,
+      });
+    },
+    [user?.id],
+    'private',
+  );
+
+  if (isLoadingBalance) {
     return <WalletSkeleton />;
   }
 
-  // Pure decoupled variables: Clean, normalized data mapped directly from the service layer
-  const total_asset = serverBalance?.total_balance ?? 0;
-  const heldBalance = serverBalance?.held_balance ?? 0;
   const availableBalance = serverBalance?.available_balance ?? 0;
+  const heldBalance = serverBalance?.held_balance ?? 0;
   const currency = serverBalance?.currency || 'Ksh';
+  const hasHistory = transactions_logs?.transactions && transactions_logs.transactions.length > 0;
 
   return (
-    <section className="min-h-screen bg-surface p-4 md:p-6 font-sans antialiased">
+    <section className="min-h-screen bg-surface p-4 md:p-6 font-sans antialiased text-on-surface">
       <div className="max-w-3xl mx-auto space-y-6">
+        
+        {/* Dynamic Websocket Engine Connection Status Tracker Badge */}
+        <div className="flex justify-end text-[10px] tracking-wider uppercase font-bold text-on-surface-variant/70 select-none">
+          <div className="flex items-center gap-1.5 bg-surface-container/60 px-2.5 py-1 rounded-full border border-border/10">
+            <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            Live Sync: {connectionStatus}
+          </div>
+        </div>
+
+        {/* Essential Core Balances Card View Component */}
         <WalletStats
           available={availableBalance}
           held={heldBalance}
@@ -86,8 +76,13 @@ export default function WalletPage() {
           onAction={(mode) => setModalMode(mode)}
         />
 
-        <TransactionLedger history={DUMMY_HISTORY} />
+        {isLoadingTransactions ? (
+          <LedgerSkeleton />
+        ) : hasHistory ? (
+          <TransactionLedger history={transactions_logs.transactions} />
+        ) : null} 
 
+        {/* Transaction Actions Modal Gate */}
         {modalMode && (
           <MpesaModal
             mode={modalMode}

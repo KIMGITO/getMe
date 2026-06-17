@@ -25,12 +25,19 @@ class MpesaService
             ]);
 
             if ($response['ResponseCode'] != 0) {
-                MpesaTransactionUpdated::broadcast($userId, 'M-Pesa request failed: ' . ($response['ResponseDescription'] ?? 'Unknown error'));
+                MpesaTransactionUpdated::broadcast(
+                    userId:$userId, 
+                    message: 'M-Pesa request failed: ' . ($response['ResponseDescription'] ?? 'Unknown error'),
+                    success: false);
                 return false;
             }
 
             Redis::setex($response['CheckoutRequestID'], 120, $userId);
-            MpesaTransactionUpdated::broadcast($userId, 'M-Pesa payment request sent. Please check your phone and enter your PIN.');
+            MpesaTransactionUpdated::broadcast(
+                userId:$userId,
+                message: 'M-Pesa payment request sent. Please check your phone and enter your PIN.',
+                success: true
+                );
 
             Log::info('MpesService Reesponse :payment request sent', [
                 'user_id' => $userId,
@@ -42,7 +49,7 @@ class MpesaService
             return $response['CheckoutRequestID'];
         } catch (\Exception $e) {
             Log::error('STK Push failed', ['error' => $e->getMessage()]);
-            MpesaTransactionUpdated::broadcast($userId, 'Failed to initiate payment. Please try again.');
+            MpesaTransactionUpdated::broadcast( userId: $userId, message: 'Failed to initiate payment. Please try again.', success: false);
             return false;
         }
     }
@@ -56,7 +63,7 @@ class MpesaService
             $fee = $this->calculateB2CCharge($amount);
             $totalAmount = $amount + $fee;
 
-            $response = Daraja::b2c()->request([
+            $response = Daraja::b2c()->send([
                 'amount' => $totalAmount,
                 'phone_number' => $phone,
                 'command_id' => 'BusinessPayment',
@@ -64,16 +71,17 @@ class MpesaService
                 'occasion' => $reason
             ]);
 
-            if (!isset($response['ResultCode']) || $response['ResultCode'] != 0) {
-                MpesaTransactionUpdated::broadcast($userId, 'Withdrawal failed: ' . ($response['ResultDesc'] ?? 'Unknown error'));
+
+            if ($response['ResponseCode'] != 0) {
+                MpesaTransactionUpdated::broadcast(userId: $userId, message: 'Withdrawal failed: ' . ($response['ResponseDescription'] ?? 'Unknown error'),  success:false);
                 return false;
             }
 
-            MpesaTransactionUpdated::broadcast($userId, "Withdrawal request sent. You will receive {$amount} KES on {$phone}.");
+            MpesaTransactionUpdated::broadcast( userId: $userId,message: "Withdrawal request sent. You will receive {$amount} KES on {$phone}.",  success:true);
             return $response;
         } catch (\Exception $e) {
             Log::error('B2C Withdrawal failed', ['error' => $e->getMessage()]);
-            MpesaTransactionUpdated::broadcast($userId, 'Withdrawal failed. Please try again.');
+            MpesaTransactionUpdated::broadcast(userId: $userId, message: 'Withdrawal failed. Please try again.'. $e->getMessage(),  success:false);
             return false;
         }
     }
@@ -117,6 +125,15 @@ class MpesaService
             Log::error('STK Callback processing failed', ['error' => $e->getMessage()]);
             return response()->json(['ResultCode' => 1, 'ResultDesc' => 'Processing failed']);
         }
+    }
+
+    /**
+     * Handle Withdraw Callback - Delegates recording to TransactionProcessor
+     */
+
+    public function b2cCallback(array $data, TransactionProcessor $processor)
+    {
+        Log::info('B2C result Callback', ['data' => $data]);
     }
 
     /**

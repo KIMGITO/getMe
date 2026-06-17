@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class RiderRequest extends FormRequest
@@ -14,7 +15,7 @@ class RiderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->role =='rider' || Auth::user()->role =='admin';
+        return Auth::user()->role =='rider';
     }
 
     /**
@@ -24,9 +25,8 @@ class RiderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rider = $this->route('user');
+        $rider = Auth::user();
         return [
-
             // Identity
             'id_number' => ['required', 'string', 'min:7', 'max:12', Rule::unique('rider_profiles', 'id_number')->ignore($rider->id, 'user_id')],
             'id_front' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],

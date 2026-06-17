@@ -5,6 +5,8 @@ interface LocationState {
   country: string;
   loading: boolean;
   error: boolean;
+  lat: number;
+  lng: number;
 }
 
 export function useCurrentLocation() {
@@ -13,6 +15,8 @@ export function useCurrentLocation() {
     country: 'Kenya',
     loading: true,
     error: false,
+    lat: -1.286389,
+    lng: 36.817223,
   });
 
   useEffect(() => {
@@ -37,7 +41,7 @@ export function useCurrentLocation() {
             const city = data.address.city || data.address.town || data.address.suburb || 'Nairobi';
             const country = data.address.country || 'Kenya';
 
-            setLocation({ city, country, loading: false, error: false });
+            setLocation({ city, country, loading: false, error: false, lat: latitude, lng: longitude });
           } else {
             throw new Error('Invalid coordinates resolve');
           }

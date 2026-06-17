@@ -14,6 +14,9 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isClient: boolean;
+  isRider: boolean;
+  isAdmin: boolean;
   
   // Actions
   setAuthSession: (user: User, token: string) => void;
@@ -27,21 +30,27 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      isClient: false,
+      isRider: false,
+      isAdmin: false,
 
       // Fire this on successful login OR instant registration
       setAuthSession: (user, token) => 
         set({ 
           user, 
           token, 
-          isAuthenticated: true 
+          isAuthenticated: true ,
+          isClient: user.role === 'client',
+          isRider: user.role === 'rider',
+          isAdmin: user.role === 'admin',
         }),
 
-      // Flushes both state memory and browser storage instantly
       logout: () => 
         set({ 
           user: null, 
           token: null, 
           isAuthenticated: false 
+
         }),
 
       setUser: (user) => set({ user }),

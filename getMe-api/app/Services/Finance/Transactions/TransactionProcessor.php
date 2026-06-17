@@ -151,7 +151,7 @@ class TransactionProcessor
             // if ($fee > 0) {
             //     $message .= " (Fee: " . number_format($fee, 2) . " KES)";
             // }
-            MpesaTransactionUpdated::broadcast($userId, $message);
+            MpesaTransactionUpdated::broadcast(userId: $userId, message: $message, success: true);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -162,7 +162,7 @@ class TransactionProcessor
             ]);
 
             if (isset($userId)) {
-                MpesaTransactionUpdated::broadcast($userId, 'Payment failed to record: ' . $e->getMessage());
+                MpesaTransactionUpdated::broadcast(userId: $userId, message: 'Payment failed to record: ' . $e->getMessage(), success: false);
             }
         }
     }
@@ -413,7 +413,7 @@ class TransactionProcessor
 
         if ($userId) {
             $errorMessage = $stkCallback['ResultDesc'] ?? 'Transaction cancelled';
-            MpesaTransactionUpdated::broadcast($userId, 'Payment failed: ' . $errorMessage);
+            MpesaTransactionUpdated::broadcast(userId: $userId,message: 'Payment failed: ' . $errorMessage,  success: false);
             Redis::del($stkCallback['CheckoutRequestID']);
         }
 

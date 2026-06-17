@@ -74,7 +74,6 @@ class FundWalletRequest extends FormRequest
 
         // Handle different phone number formats
         if (strlen($phone) === 12 && substr($phone, 0, 3) === '254') {
-            // Already in 254XXXXXXXXX format
             return $phone;
         } 
         
@@ -98,7 +97,6 @@ class FundWalletRequest extends FormRequest
             return $phone;
         }
 
-        // Return original if no pattern matches (validation will catch invalid formats)
         return $phone;
     }
 

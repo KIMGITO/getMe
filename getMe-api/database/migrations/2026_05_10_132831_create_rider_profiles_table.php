@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('suspension_reason')->nullable();
 
             $table->boolean('is_verified')->false();
+            $table->boolean('is_waiting_verification')->false();
 
             $table->timestamps();
             $table->index('vehicle_plate_number');

@@ -14,15 +14,16 @@ export interface Wallet {
 
 export interface TransactionLog {
   id: string;
-  reference: string;
-  type:TransactionTypes;
+  transaction_code: string;
+  type: TransactionTypes;
   amount: number;
-  date: string;
+  created_at: string;
   status: TransactionStatus;
   description?: string;
+  transactions?: any
 }
 
-export interface FundWalletResponse {
+export interface WalletResponse {
   success: boolean;
   message: string;
   checkout_request_id?: string;
@@ -65,17 +66,27 @@ export const walletServices = {
   topup: async (
     amount: number,
     phoneNumber: string,
-  ): Promise<FundWalletResponse> => {
-    const response = await apiClient.post<FundWalletResponse>('/wallet/fund', {
+  ): Promise<WalletResponse> => {
+    const response = await apiClient.post<WalletResponse>('/wallet/fund', {
       amount: amount,
       phone_number: phoneNumber,
     });
     return response.data;
   },
 
-  transactionsLog: async (userId: string): Promise<TransactionLog[]> => {
+  withdraw: async (
+    amount: number,
+    phoneNumber: string,
+  ): Promise<WalletResponse> => {
+    const response = await apiClient.post<WalletResponse>('/wallet/withdraw', {
+      amount: amount,
+      phone_number: phoneNumber,
+    });
+    return response.data;
+  },
+  transactionsLog: async (userId: string): Promise<any> => {
     const response = await apiClient.get<TransactionLog[]>(
-      `/wallet/transaction-log/${userId}`,
+      `/wallet/transactions/${userId}`,
     );
     return response.data;
   },

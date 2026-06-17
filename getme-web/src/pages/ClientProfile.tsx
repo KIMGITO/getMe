@@ -1,6 +1,5 @@
 import ProfileCard from '@/components/user/profile-card';
 import ProfileForm from '@/components/user/profile-form';
-import AuthLayout from '@/layouts/auth-layout';
 
 function ClientProfile() {
   return (

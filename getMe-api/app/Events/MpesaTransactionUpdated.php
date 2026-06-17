@@ -21,6 +21,7 @@ class MpesaTransactionUpdated implements ShouldBroadcast
     public function __construct(
         public string $userId,
         public string $message,
+        public bool $success
     ) {}
 
     /**
@@ -32,7 +33,8 @@ class MpesaTransactionUpdated implements ShouldBroadcast
     {
         Log::info('Broadcasting M-Pesa transaction update', [
             'user_id' => $this->userId,
-            'message' => $this->message
+            'message' => $this->message,
+            'success' => $this->success
         ]);
 
         return [
@@ -50,6 +52,7 @@ class MpesaTransactionUpdated implements ShouldBroadcast
         return [
             'message' => $this->message,
             'user_id' => $this->userId,
+            'success' => $this->success??true,
             'timestamp' => now()->toIso8601String()
         ];
     }
@@ -59,6 +62,6 @@ class MpesaTransactionUpdated implements ShouldBroadcast
     //  */
     public function broadcastAs(): string
     {
-        return 'mpesa.transaction.updated';
+        return 'mpesaTransactionUpdated';
     }
 }

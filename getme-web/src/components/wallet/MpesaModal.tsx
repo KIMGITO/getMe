@@ -5,7 +5,6 @@ import SubmitButton from '@/components/UI/submit-btn';
 import mpes_logo from '@assets/branding/mpesa-logo.png';
 import { useWalletMutation } from '@/hooks/useWalletMutation';
 import { useAuthStore } from '@/stores/authStore';
-import { useToastStore } from '@/stores/useToastStore';
 
 interface MpesaModalProps {
   mode: 'topup' | 'withdraw';
@@ -29,7 +28,6 @@ export const MpesaModal: React.FC<MpesaModalProps> = ({
     setValidationError,
     executeTransaction,
   } = useWalletMutation({ availableBalance, onSuccessClose: onClose });
-    const  toast = useToastStore((state) => state.toast);
 
 
     const {user} = useAuthStore();
@@ -42,15 +40,6 @@ export const MpesaModal: React.FC<MpesaModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const  res = await  executeTransaction(mode);
-
-    console.log('res', res);
-    toast({
-      message: res.success == true? 'Success' : 'Error',
-      variant: res.success == true? 'success' : 'error',
-      description: res.message ,
-      duration: 5000,
-      position: 'top-center',
-    })
 
   };
 
@@ -136,7 +125,7 @@ export const MpesaModal: React.FC<MpesaModalProps> = ({
               <BiCoin className="text-lg text-primary mt-0.5" />
               <p className="text-[11px] text-on-surface-variant leading-relaxed">
                 {mode === 'topup'
-                  ? 'Submitting will broadcast an instant, secure Safaricom cryptographic STK menu window directly onto your active SIM line to prompt manual PIN insertion safely.'
+                  ? 'Submitting will  send a prompt requesting for mpesa pin to complete the transaction.'
                   : 'Submitting executes an asynchronous institutional bank settlement routing directly to the specified destination Safaricom ledger node immediately.'}
               </p>
             </div>
@@ -145,10 +134,10 @@ export const MpesaModal: React.FC<MpesaModalProps> = ({
               className="bg-green-600 hover:bg-green-700 text-white w-full"
               label={
                 loading
-                  ? 'Processing Interconnect Link...'
+                  ? 'Processing Transaction ...'
                   : mode === 'topup'
-                    ? 'Initiate M-Pesa Topup'
-                    : 'Confirm Cash Outbound'
+                    ? 'Topup'
+                    : 'Confirm Withdrawal'
               }
               disabled={loading || !amount || !phone}
             />
