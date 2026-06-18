@@ -10,6 +10,7 @@ import {
 import { TbMapRoute, TbTruckDelivery } from 'react-icons/tb';
 import { LuPackageOpen, LuClock } from 'react-icons/lu';
 import RiderLiveActivityPanel from '@/components/UI/rider/RiderActivityPannel';
+import { useRiderLocation } from '@/hooks/useRiderLocation';
 
 function RiderHomePage() {
   // ⚡ Live Duty State Toggle
@@ -23,8 +24,14 @@ function RiderHomePage() {
     { id: 'dropped', label: 'Completed', icon: <LuPackageOpen /> },
   ];
   
-  // Current active live job index placeholder (e.g., Rider is currently out in transit)
   const currentAssignmentStageIndex = 2; 
+
+  useRiderLocation({
+    isActive: isOnline,
+    onLocationUpdate: async (coords) => {
+      console.log('Rider location updated:', coords);
+    }
+  });
 
   return (
     <section className="md:px-6 flex-1 antialiased font-sans bg-surface transition-colors duration-300">

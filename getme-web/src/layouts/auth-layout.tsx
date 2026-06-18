@@ -8,7 +8,7 @@ function AuthLayout({
   navItems?: ContextualNavItem[];
 }) {
   return (
-    <div className="bg-surface h-screen flex flex-col overflow-hidden">
+    <div className="bg-surface h-[100dvh] flex flex-col overflow-hidden">
       <Navigation customNavItems={navItems} />
       {children}
     </div>

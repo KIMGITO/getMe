@@ -20,8 +20,11 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->decimal('latitude', 10, 7);
-            $table->decimal('longitude', 10, 7);
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+
+            $table->float('heading')->nullable();
+            $table->float('speed')->nullable();
 
             $table->timestamp('last_seen_at')->nullable();
 

@@ -1,6 +1,6 @@
 export function RiderProfileSkeleton() {
   return (
-    <div className="flex min-h-screen flex-col  h-full max-w-4xl w-full mx-auto bg-surface-container-lowest border border-outline-variant/40 elevation-5 my-4 rounded-2xl overflow-hidden font-sans antialiased animate-pulse">
+    <div className="flex min-h-[100dvh] flex-col  h-full max-w-4xl w-full mx-auto bg-surface-container-lowest border border-outline-variant/40 elevation-5 my-4 rounded-2xl overflow-hidden font-sans antialiased animate-pulse">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low">
         <div className="flex items-center gap-3">

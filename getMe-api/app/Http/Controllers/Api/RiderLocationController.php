@@ -16,7 +16,7 @@ class RiderLocationController extends Controller
     {
         $user = $request->user();
 
-        $isProfileUpdated = Rider::assignable()->where('user_id', $user->id)->exists();
+        $isProfileUpdated = Rider::assignable()->where('user_id', $user->id)->expapiists();
 
         if (! $isProfileUpdated) {
             throw new Exception('Can not assign task: rider, profile details not provided.');
@@ -25,6 +25,8 @@ class RiderLocationController extends Controller
         $validated = $request->validate([
             'lat' => ['required', 'numeric'],
             'lng' => ['required', 'numeric'],
+            'heading' => ['required', 'numeric'],
+            'speed' => ['required', 'numeric'],
         ]);
 
         return $riderLocationService->updateLocation($validated['lat'], $validated['lng'], $user);

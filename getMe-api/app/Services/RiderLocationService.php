@@ -12,7 +12,7 @@ class RiderLocationService
         protected GeoService $geo
     ) {}
 
-    public function updateLocation(float $lat, float $lng, User $user): array
+    public function updateLocation(float $lat, float $lng, float $heading, float  $speed ,  User $user): array
     {
         // Ensure only riders can update location
         if ($user->role !== 'rider') {
@@ -32,6 +32,8 @@ class RiderLocationService
                 [
                     'latitude' => $lat,
                     'longitude' => $lng,
+                    'heading' => $heading,
+                    'speed' => $speed,
                     'last_seen_at' => now(),
                 ]
             );
@@ -44,6 +46,8 @@ class RiderLocationService
             'message' => 'Location updated',
             'latitude' => $lat,
             'longitude' => $lng,
+            'heading' => $heading,
+            'speed' => $speed
         ];
     }
 

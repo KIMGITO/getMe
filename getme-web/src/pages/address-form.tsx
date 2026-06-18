@@ -56,7 +56,7 @@ interface AddressFormProps {
 function AddressForm({
   onSubmit,
   initialData = {},
-  height = 'h-screen ',
+  height = 'h-[100dvh] ',
 }: AddressFormProps) {
   const [step, setStep] = useState<'map' | 'details'>('map');
   const [showInstruction, setShowInstruction] = useState(true);

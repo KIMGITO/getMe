@@ -57,7 +57,7 @@ export default function WalletPage() {
   const hasHistory = transactions_logs?.transactions && transactions_logs.transactions.length > 0;
 
   return (
-    <section className="min-h-screen bg-surface p-4 md:p-6 font-sans antialiased text-on-surface">
+    <section className="min-h-[100dvh] bg-surface p-4 md:p-6 font-sans antialiased text-on-surface">
       <div className="max-w-3xl mx-auto space-y-6">
         
         {/* Dynamic Websocket Engine Connection Status Tracker Badge */}

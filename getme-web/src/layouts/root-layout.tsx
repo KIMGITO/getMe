@@ -11,7 +11,7 @@ export default function RootLayout() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return (
-    <div className="min-h-screen bg-background text-on-surface flex flex-col">
+    <div className="min-h-[100dvh] bg-background text-on-surface flex flex-col">
       {/* Dynamic Navigation Switch */}
       {isAuthenticated ? <Navigation /> : <GuestNavigation />}
       

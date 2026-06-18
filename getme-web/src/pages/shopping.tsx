@@ -116,7 +116,7 @@ export default function IntegratedOrderPage() {
 
   return (
 
-      <div className="flex h-screen flex-col  h-full max-w-4xl w-full mx-auto bg-surface-container-lowest text-on-surface  elevation-5 my-4 rounded-2xl overflow-hidden font-sans antialiased">
+      <div className="flex h-[100dvh] flex-col  h-full max-w-4xl w-full mx-auto bg-surface-container-lowest text-on-surface  elevation-5 my-4 rounded-2xl overflow-hidden font-sans antialiased">
         {/* Universal Management Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low z-10">
           <div className="flex items-center gap-3">

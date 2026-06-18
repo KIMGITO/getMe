@@ -30,7 +30,7 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
+      <div className="min-h-[100dvh] bg-surface flex flex-col items-center justify-center p-6">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest mt-4">
           Syncing secure environment...

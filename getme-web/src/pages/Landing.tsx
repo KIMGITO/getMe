@@ -47,7 +47,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="w-full bg-background min-h-screen flex flex-col selection:bg-primary selection:text-on-primary overflow-x-hidden">
+    <div className="w-full bg-background min-h-[100dvh] flex flex-col selection:bg-primary selection:text-on-primary overflow-x-hidden">
       {/* 1. Hero Marketing Section */}
       <section className="relative py-16 lg:py-28 px-4 max-w-screen-xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center ">
         {/* Left Focus: Advertising Hooks & Call To Actions */}
