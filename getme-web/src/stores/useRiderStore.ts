@@ -1,17 +1,27 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { FormStep, RiderProfileState, RiderProfilePayload, FetchedRiderData } from '@/types/riders';
+import {
+  FormStep,
+  RiderProfileState,
+  RiderProfilePayload,
+  FetchedRiderData,
+  RiderDashboard,
+} from '@/types/riders';
 
 // 1. Separate state slices for operational control vs form scratchpad
 interface RiderOperationalState {
   rider: FetchedRiderData | null;
+  riderDashboard: RiderDashboard | null;
   isOnline: boolean;
   isLoadingProfile: boolean;
 }
 
 interface RiderActions {
   setStep: (step: FormStep) => void;
-  updateFields: (fields: Partial<Omit<RiderProfileState, 'id_front' | 'id_back'>>) => void;
+  setRiderDashboard: (rider: RiderDashboard | null) => void;
+  updateFields: (
+    fields: Partial<Omit<RiderProfileState, 'id_front' | 'id_back'>>,
+  ) => void;
   setFiles: (files: { id_front?: File | null; id_back?: File | null }) => void;
   clearForm: () => void; // Clears form ONLY, leaves operational state intact
   getSubmissionPayload: () => RiderProfilePayload;
@@ -20,7 +30,7 @@ interface RiderActions {
   setRiderProfile: (rider: FetchedRiderData | null) => void;
   setOnlineStatus: (status: boolean) => void;
   setLoadingProfile: (loading: boolean) => void;
-  
+
   // Master Reset (Use only for explicit user logout)
   resetAll: () => void;
 }
@@ -43,7 +53,11 @@ const INITIAL_FORM_STATE = {
   agreed_to_terms: false,
 };
 
-export const useRiderStore = create<Omit<RiderProfileState, 'isSubmitting' | 'submitError'> & RiderOperationalState & RiderActions>()(
+export const useRiderStore = create<
+  Omit<RiderProfileState, 'isSubmitting' | 'submitError'> &
+    RiderOperationalState &
+    RiderActions
+>()(
   persist(
     (set, get) => ({
       // Mount Core Form State
@@ -55,21 +69,23 @@ export const useRiderStore = create<Omit<RiderProfileState, 'isSubmitting' | 'su
       rider: null,
       isOnline: false,
       isLoadingProfile: false,
+      riderDashboard: null,
 
       /* ====================================================================
          FORM ACTIONS
          ==================================================================== */
       setStep: (step) => set({ step }),
-      
+
       updateFields: (fields) => set((state) => ({ ...state, ...fields })),
-      
+
       setFiles: (files) => set((state) => ({ ...state, ...files })),
-      
-      clearForm: () => set({
-        ...INITIAL_FORM_STATE,
-        id_front: null,
-        id_back: null,
-      }),
+
+      clearForm: () =>
+        set({
+          ...INITIAL_FORM_STATE,
+          id_front: null,
+          id_back: null,
+        }),
 
       getSubmissionPayload: () => {
         const state = get();
@@ -92,7 +108,7 @@ export const useRiderStore = create<Omit<RiderProfileState, 'isSubmitting' | 'su
           id_back: state.id_back,
         };
       },
-
+      setRiderDashboard: (rider) => set({ riderDashboard: rider }),
       /* ====================================================================
          OPERATIONAL STATUS ACTIONS
          ==================================================================== */
@@ -101,21 +117,23 @@ export const useRiderStore = create<Omit<RiderProfileState, 'isSubmitting' | 'su
       setLoadingProfile: (isLoadingProfile) => set({ isLoadingProfile }),
 
       // Complete system purge (useful for user session timeouts or logouts)
-      resetAll: () => set({
-        ...INITIAL_FORM_STATE,
-        id_front: null,
-        id_back: null,
-        rider: null,
-        isOnline: false,
-        isLoadingProfile: false,
-      }),
+      resetAll: () =>
+        set({
+          ...INITIAL_FORM_STATE,
+          id_front: null,
+          id_back: null,
+          rider: null,
+          isOnline: false,
+          isLoadingProfile: false,
+        }),
     }),
     {
       name: 'getme-rider-storage',
       storage: createJSONStorage(() => localStorage),
       // Prevent volatile binary memory files from serializing to disk
       partialize: (state) => {
-        const { id_front, id_back, isLoadingProfile, ...persistedSlice } = state;
+        const { id_front, id_back, isLoadingProfile, ...persistedSlice } =
+          state;
         return persistedSlice;
       },
       merge: (persistedState: any, currentState) => ({
@@ -123,8 +141,8 @@ export const useRiderStore = create<Omit<RiderProfileState, 'isSubmitting' | 'su
         ...persistedState,
         id_front: null,
         id_back: null,
-        isLoadingProfile: false, 
+        isLoadingProfile: false,
       }),
-    }
-  )
+    },
+  ),
 );

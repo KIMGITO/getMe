@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RiderRequest;
 use App\Models\Rider;
+use App\Services\RiderService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,31 @@ use Illuminate\Support\Facades\Log;
 
 class RiderController extends Controller
 {
+
+    public function  dashboard(Request $request,  RiderService $riderService){
+        try{ $user = $request->user();
+            if($user->role != 'rider'){
+                throw new Exception('User is not a registered rider');
+            }
+
+
+            $dashboardData = $riderService->dashboard($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'ok',
+                'data' => $dashboardData
+            ]);
+        }catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
+
     public function setupProfile(RiderRequest $request){
     
          $user = $request->user();
@@ -74,6 +100,44 @@ class RiderController extends Controller
         return response()->json([
                 'success' => true,
                 'status' => 'incomplete'
+            ]);
+    }
+
+    public function toggleOnlineStatus(Request $request){
+        $user = $request->user();
+        if($user->role != 'rider'){
+            throw new Exception('User is not a registered rider');
+        }
+
+        $user = $user->load(['rider']);
+
+
+        $rider = $user->rider;
+        if(!$user->rider || !$user->rider->isAssignable()){
+           return response()->json([
+                'success' => false,
+                'status' => false,
+                'message' => "Rider can't be online at the moment."
+            ]);
+        }
+
+
+        if($rider) {
+            $rider->is_active = !$rider->is_active;
+            $rider->save();
+
+            return response()->json([
+                'success' => true,
+                'status' => $rider->is_active,
+                'message' => 'ok'
+            ]);
+
+
+        }
+        return response()->json([
+                'success' => true,
+                'status' => false,
+                'message' => 'ok'
             ]);
     }
 }

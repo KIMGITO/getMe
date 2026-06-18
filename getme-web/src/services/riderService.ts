@@ -1,7 +1,12 @@
-import {  RiderOnboardingResponse, RiderProfilePayload, RiderStatusMetrics, RiderVerificationStatus } from '@/types/riders';
+import {  RiderDashboard, RiderOnboardingResponse, RiderProfilePayload, RiderStatusMetrics, RiderVerificationStatus } from '@/types/riders';
 import { apiClient } from './apiClient';
 
 export const riderService = {
+
+  getDashboardData:  async (): Promise<any> => {
+    const response = await apiClient.get<RiderDashboard>('/riders/dashboard');
+    return response.data;
+  },
  
   submitProfile: async (payload: RiderProfilePayload): Promise<RiderOnboardingResponse> => {
     const formData = new FormData();
@@ -72,5 +77,13 @@ export const riderService = {
   verificationStatus: async (): Promise<RiderVerificationStatus> => {
     const response = await apiClient.get('/riders/verification-status');
     return response.data;
-  }
+  },
+
+  /**
+   * Toggle rider online status.
+   */
+  toggleOnlineStatus: async (): Promise<{ success: boolean; message: string, status: boolean }> => {
+    const response = await apiClient.patch('/riders/online-status');
+    return response.data;
+  },
 };

@@ -38,11 +38,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::prefix('riders')->name('riders.')->group(function () {
+        Route::get('/dashboard', [RiderController::class, 'dashboard'])->name('dashboard');
         Route::post('/profile', [RiderController::class, 'setupProfile'])->name('profile.update');
-        // rider location
-        Route::post('/location', [RiderLocationController::class, 'update'])->name('location.update');
+        Route::patch('/location', [RiderLocationController::class, 'update'])->name('location.update');
         Route::post('/nearby', [RiderLocationController::class, 'nearby'])->name('nearby');
         Route::get('/verification-status', [RiderController::class, 'verificationStatus'])->name('verificationStatus');
+        Route::patch('/online-status', [RiderController::class, 'toggleOnlineStatus'])->name('toggleOnlineStatus');
     });
 
     Route::prefix('clients')->name('clients.')->group(function () {

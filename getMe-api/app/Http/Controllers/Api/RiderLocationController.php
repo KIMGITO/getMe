@@ -16,7 +16,7 @@ class RiderLocationController extends Controller
     {
         $user = $request->user();
 
-        $isProfileUpdated = Rider::assignable()->where('user_id', $user->id)->expapiists();
+        $isProfileUpdated = Rider::isAssignable()->where('user_id', $user->id)->exists();
 
         if (! $isProfileUpdated) {
             throw new Exception('Can not assign task: rider, profile details not provided.');
@@ -25,11 +25,11 @@ class RiderLocationController extends Controller
         $validated = $request->validate([
             'lat' => ['required', 'numeric'],
             'lng' => ['required', 'numeric'],
-            'heading' => ['required', 'numeric'],
-            'speed' => ['required', 'numeric'],
+            'heading' => ['nullable'],
+            'speed' => ['nullable'],
         ]);
 
-        return $riderLocationService->updateLocation($validated['lat'], $validated['lng'], $user);
+        return $riderLocationService->updateLocation(lat: $validated['lat'], lng: $validated['lng'], heading:  $validated['heading'] ?? 0, speed: $validated['speed'] ?? 0,user: $user);
     }
 
     // nearby  and allocate the nearest

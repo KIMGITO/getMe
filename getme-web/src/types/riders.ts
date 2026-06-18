@@ -23,6 +23,29 @@ export interface RiderOnboardingResponse {
   status?: OnboardingStatus;
 }
 
+
+export interface RiderDashboard{
+  name: string;
+  phone: string;
+  email: string;
+  role: string;
+  is_online: boolean;
+  is_verified: boolean;
+  position: {
+    lat: number;
+    lng: number;
+    heading: number;
+    speed: number;
+  };
+  vehicle: {
+    type: VehicleType;
+    model: string;
+    plate_number: string;
+  };
+  is_idle: boolean
+}
+
+
 export interface BaseRiderFields {
   name: string;
   phone_number: string;

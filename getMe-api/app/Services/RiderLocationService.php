@@ -12,7 +12,7 @@ class RiderLocationService
         protected GeoService $geo
     ) {}
 
-    public function updateLocation(float $lat, float $lng, float $heading, float  $speed ,  User $user): array
+    public function updateLocation(float $lat, float $lng,   User $user,  float $heading = 0 , float  $speed = 0 ): array
     {
         // Ensure only riders can update location
         if ($user->role !== 'rider') {
@@ -20,7 +20,8 @@ class RiderLocationService
         }
 
         // to avoid too much updates on the db
-        $location = RiderLocation::where('rider_id', $user->id)->first();
+        // $location = RiderLocation::where('rider_id', $user->id)->first();
+        $location= $user->load(['rider.location'])?->rider?->location;
 
         if (
             ! $location ||

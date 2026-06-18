@@ -8,6 +8,7 @@ use App\Services\GeoService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 #[Fillable([
     'user_id',
@@ -51,13 +52,24 @@ class Rider extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function scopeAssignable($query)
-    {
-        return $query->/* where('is_verified', true)->where('is_active', true)-> */where('is_suspended', false)->where('is_blacklisted', false);
+    public function location(){
+        return $this->hasOne(RiderLocation::class, 'rider_id', 'user_id');
     }
 
-    public function location()
+    public function scopeIsAssignable($query)
     {
+        return $query->where('is_verified', true)->where('is_active', true)-> where('is_suspended', false)->where('is_blacklisted', false);
+    }
+
+    
+
+    public function getLocationData()
+    {
+
+        if (!$this->user_id) {
+            return null;
+        }
+
         return app(GeoService::class)->getRiderLocation($this->user_id);
     }
 
