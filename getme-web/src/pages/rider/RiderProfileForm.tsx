@@ -2,17 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {
   BiChevronLeft,
   BiEraser,
-  BiLoaderAlt,
   BiCheck,
-  BiUser,
   BiInfoCircle,
   BiXCircle,
   BiTimeFive,
 } from 'react-icons/bi';
 import {
-  useRiderProfileStore,
-  VehicleType,
-} from '@/stores/useRiderProfileStore';
+  useRiderStore,
+} from '@/stores/useRiderStore';
 import Input from '@/components/UI/Input';
 import SubmitButton from '@/components/UI/submit-btn';
 import Checkbox from '@/components/UI/CheckBox';
@@ -24,12 +21,13 @@ import { useCurrentLocation } from '@/stores/useCurrentLocation';
 import Button from '@/components/UI/Button';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
-import { riderServices } from '@/services/riderServices';
 import { useQuery } from '@tanstack/react-query';
 import { RiderProfileSkeleton } from '@/components/UI/skeleton/RiderProfileSkeleton';
+import { RiderVerificationStatus } from '@/types/riders';
+import { riderService } from '@/services/riderService';
 
 export default function RiderProfileForm() {
-  const store = useRiderProfileStore();
+  const store = useRiderStore();
   const navigate = useNavigate();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,13 +35,12 @@ export default function RiderProfileForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
   
-  // Local toggle to allow rejected users to open up and fix their forms
   const [forceEditForm, setForceEditForm] = useState(false);
 
   // Fetch Verification Status
-  const { data: riderVerificationStatus, isLoading } = useQuery({
+  const { data: riderVerificationStatus  , isLoading } = useQuery<RiderVerificationStatus>({
     queryKey: ['riderVerificationStatus'],
-    queryFn: riderServices.verificationStatus,
+    queryFn: riderService.verificationStatus,
     enabled: true,
   });
 
@@ -77,30 +74,30 @@ export default function RiderProfileForm() {
     setFormErrors({});
 
     try {
-      const response = await store.submitProfile();
+      const payload = store.getSubmissionPayload();
 
-      if (response.success) {
-        setIsSubmittedSuccessfully(true);
-        store.setStep('review');
-      } else {
-        console.warn(response.error);
-        setSubmitError(response.error || 'Failed to submit rider profile.');
-      }
+      await riderService.submitProfile(payload);
+
+      // 3. Clear the store and update UI workflow states upon success
+      store.clearForm();
+      setIsSubmittedSuccessfully(true);
+      store.setStep('review');
+      
     } catch (err: any) {
       const status = err.response?.status;
       if (status === 500) {
         setSubmitError('An unexpected server error occurred. Please try again.');
       } else if (status === 403) {
-        setSubmitError(err.response?.data?.message);
+        setSubmitError(err.response?.data?.message || 'Access denied.');
       } else if (status === 422) {
         setFormErrors(err.response?.data?.errors || {});
       } else {
-        setSubmitError('Unexpected error occurred. Please try again or contact support.');
+        setSubmitError('An unexpected error occurred. Please try again or contact support.');
       }
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   // --- 1. GLOBAL LOADING SCREEN ---
   if (isLoading) {
@@ -199,7 +196,7 @@ export default function RiderProfileForm() {
           type="button"
           onClick={() => {
             setSubmitError(null);
-            store.clearStore();
+            store.clearForm();
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-error hover:bg-error/10 rounded-xl transition-all font-bold"
         >
@@ -386,8 +383,8 @@ export default function RiderProfileForm() {
                 variant="primary"
                 className="mt-4"
                 onClick={() => {
-                  store.clearStore();
-                  setForceEditForm(false); // Reset view flag
+                  store.clearForm();
+                  setForceEditForm(false); 
                   navigate(ROUTES.RIDER_HOME);
                 }}
               >

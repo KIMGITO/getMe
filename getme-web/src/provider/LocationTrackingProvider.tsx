@@ -1,9 +1,7 @@
 // src/providers/LocationTrackingProvider.tsx
 import React, { createContext, useEffect, useRef } from 'react';
-// Assuming you use your Zustand store or an auth state to check if the rider is online
 import { useRiderStore } from '@/store/useRiderStore'; 
-import axios from 'axios';
-import { apiClient } from '@/services/apiClient';
+import { riderServices } from '@/services/riderService';
 
 export const LocationTrackingContext = createContext(null);
 
@@ -23,14 +21,7 @@ export function LocationTrackingProvider({ children }: { children: React.ReactNo
       (position) => {
         const currentTime = Date.now();
         if (currentTime - lastUpdateTime.current >= TIME_THRESHOLD) {
-          
-          apiClient.post('/rider/location',{
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            heading: position.coords.heading,
-            speed: position.coords.speed
-          }).then(res => console.log(res)).catch(err => console.error("Failed to update your location", err));
-
+          riderServices.updateLocation( position.coords.latitude, position.coords.longitude, position.coords.heading, position.coords.speed);
           lastUpdateTime.current = currentTime;
         }
       },

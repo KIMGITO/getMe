@@ -10,7 +10,6 @@ class RiderLocation extends Model
 {
     protected $casts = ['last_seen_at' => 'datetime'];
     
-
     public function rider(){
         return $this->belongsTo(User::class ,'rider_id');
     }

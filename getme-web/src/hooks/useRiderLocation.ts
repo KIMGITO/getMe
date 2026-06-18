@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 interface TrackingOptions {
-  isActive: boolean; // Turn tracking on/off based on rider duty status
+  isActive: boolean; 
   onLocationUpdate: (coords: { lat: number; lng: number; heading: number | null; speed: number | null }) => void;
 }
 
@@ -48,5 +48,5 @@ export function useRiderLocation({ isActive, onLocationUpdate }: TrackingOptions
       console.log("Killing active GPS hardware stream.");
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [isActive, onLocationUpdate]); // Restarts tracking gracefully if these flags change
+  }, [isActive, onLocationUpdate]); 
 }
