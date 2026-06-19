@@ -8,11 +8,13 @@ interface UIState {
   sidebarOpen: boolean;
   modalOpen: boolean;
   modalContent: React.ReactNode | null;
+ 
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   toggleSidebar: () => void;
   openModal: (content: React.ReactNode) => void;
   closeModal: () => void;
+
 }
 
 export const useUIStore = create<UIState>()(

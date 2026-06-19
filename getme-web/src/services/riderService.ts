@@ -59,14 +59,14 @@ export const riderService = {
     longitude: number,
     heading: number | null,
     speed: number | null,
-  ): Promise<{ success: boolean; message: string }> => {
+  ): Promise<{ success: boolean; message: string, heading: number, speed: number }> => {
     const response = await apiClient.patch(`/riders/location`, {
       'lat': latitude,
       'lng': longitude,
       'heading': heading,
       'speed': speed
     }).catch((error) => {
-      throw new Error(error.response.data.message);
+      throw new Error(error.response.message);
     });
     return response.data;
   },

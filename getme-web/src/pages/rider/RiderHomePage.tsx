@@ -9,54 +9,60 @@ import {
 } from 'react-icons/hi';
 import { TbMapRoute, TbTruckDelivery } from 'react-icons/tb';
 import { LuPackageOpen, LuClock } from 'react-icons/lu';
-import RiderLiveActivityPanel from '@/components/UI/rider/RiderActivityPannel';
-import { useRiderLocation } from '@/hooks/useRiderLocation';
+import RiderLiveActivityPanel, {
+  RiderLocation,
+} from '@/components/UI/rider/RiderActivityPannel';
+import { useRiderLocation, useRiderLocationSimulated } from '@/hooks/useRiderLocation';
 import { useRiderStore } from '@/stores/useRiderStore';
 import { riderService } from '@/services/riderService';
 import { useToastStore } from '@/stores/useToastStore';
 import { useQuery } from '@tanstack/react-query';
 import { RiderDashboard } from '@/types/riders';
 import { useAuthStore } from '@/stores/authStore';
+import live from '@assets/branding/live.svg';
 
 function RiderHomePage() {
   const toast = useToastStore((state) => state.toast);
   const { isOnline, setOnlineStatus } = useRiderStore();
-  const {user }=   useAuthStore();
 
-  const {data:dashboard, isLoading: isLoadingDashboard} = useQuery<RiderDashboard>({
-    queryKey: ['rider', 'dashboard'],
-    queryFn: () => riderService.getDashboardData(),
-    enabled: isOnline
+  const { data: dashboard, isLoading: isLoadingDashboard } =
+    useQuery<RiderDashboard>({
+      queryKey: ['rider', 'dashboard'],
+      queryFn: () => riderService.getDashboardData(),
+      enabled: isOnline,
+    });
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [liveLocation, setLiveLocation] = useState<RiderLocation>({
+    lat: -1.286389,
+    lng: 36.817223,
+    heading: 0,
+    speed: 0,
   });
 
-  
+  const handleOnlineStatusChange = async () => {
+    if (isUpdatingStatus) return;
 
-const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    setIsUpdatingStatus(true);
+    const previousState = isOnline;
+    setOnlineStatus(!previousState);
 
-const handleOnlineStatusChange = async () => {
-  if (isUpdatingStatus) return;
+    try {
+      const response = await riderService.toggleOnlineStatus();
+      setOnlineStatus(response.status);
+    } catch (error) {
+      setOnlineStatus(previousState);
 
-  setIsUpdatingStatus(true);
-  const previousState = isOnline; 
-  setOnlineStatus(!previousState);
-
-  try {
-    const response = await riderService.toggleOnlineStatus();
-    setOnlineStatus(response.status);
-  } catch (error) {
-    setOnlineStatus(previousState);
-    
-    toast({
-      message: 'Error',
-      variant: 'error',
-      description: 'Failed to switch online status.',
-      duration: 5000,
-      position: 'top-right',
-    });
-  } finally {
-    setIsUpdatingStatus(false);
-  }
-};
+      toast({
+        message: 'Error',
+        variant: 'error',
+        description: 'Failed to switch online status.',
+        duration: 5000,
+        position: 'top-right',
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   const riderStages = [
     { id: 'accepted', label: 'Accepted', icon: '✓' },
@@ -67,11 +73,22 @@ const handleOnlineStatusChange = async () => {
 
   const currentAssignmentStageIndex = 3;
 
-  useRiderLocation({
+  useRiderLocationSimulated({
     isActive: isOnline,
     onLocationUpdate: async (coords) => {
-      await riderService.updateLocation(coords.lat, coords.lng, coords.heading, coords.speed);
-      // console.log('Rider location updated:', coords);
+      setLiveLocation({
+          lat: coords.lat,
+          lng: coords.lng,
+          heading: coords.heading || 0,
+          speed: coords.speed ||0
+        });
+        
+       riderService.updateLocation(
+        coords.lat,
+        coords.lng,
+        coords.heading || 0,
+        coords.speed || 0,
+      );
     },
   });
 
@@ -92,7 +109,7 @@ const handleOnlineStatusChange = async () => {
               </div>
             </div>
 
-            <div
+            <div  
               className={`p-1.5 border rounded-2xl flex justify-between items-center transition-all duration-300 ${
                 isOnline
                   ? 'bg-emerald-500/10 border-emerald-500/30'
@@ -100,13 +117,8 @@ const handleOnlineStatusChange = async () => {
               }`}
             >
               <div className="flex items-center gap-3 pl-3">
-                <div className="relative flex h-3 w-3">
-                  <span
-                    className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOnline ? 'bg-emerald-400' : 'bg-muted-foreground'}`}
-                  />
-                  <span
-                    className={`relative inline-flex rounded-full h-3 w-3 ${isOnline ? 'bg-emerald-500' : 'bg-muted-foreground'}`}
-                  />
+                <div className="w-10 h-10">
+                  <img src={live} />
                 </div>
                 <span className="text-sm font-bold text-on-surface">
                   Status:{' '}
@@ -189,6 +201,7 @@ const handleOnlineStatusChange = async () => {
 
           {isOnline ? (
             <RiderLiveActivityPanel
+              location={liveLocation}
               stages={riderStages}
               activeStageIndex={currentAssignmentStageIndex}
             />

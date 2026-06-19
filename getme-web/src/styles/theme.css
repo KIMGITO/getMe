@@ -1008,6 +1008,8 @@
     appearance: textfield;
   }
 
+  
+
   .tooltip::before {
     content: attr(data-tooltip);
     position: absolute;
