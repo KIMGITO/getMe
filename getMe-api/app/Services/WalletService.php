@@ -192,7 +192,6 @@ class WalletService
     public function getBalance(string $userId): array
     {
         $wallet = Wallet::where('user_id', $userId)->first();
-
         if (!$wallet) {
             return [
                 'success' => false,

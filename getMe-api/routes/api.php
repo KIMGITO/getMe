@@ -57,13 +57,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
     });
 
-    Route::post('/shopping-list', [ShoppingListController::class, 'store'])->name('shoppingList.store');
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::post('/', [ShoppingListController::class, 'store'])
+            ->name('store');
+        Route::get('/', [ShoppingListController::class, 'index'])
+            ->name('index');
+        Route::post('/{id}/preview-fee', [ShoppingListController::class, 'previewFee'])
+            ->name('preview-fee');
+        Route::post('/{id}/checkout', [ShoppingListController::class, 'checkout'])
+            ->name('checkout');
+    });
 
     Route::prefix('wallet')->name('wallet.')->group(function () {
         Route::post('/fund', [WalletController::class, 'fund'])->name('fund');
         Route::post('/withdraw', [WalletController::class, 'withdraw'])->name('withdraw');
         Route::get('/balance/{user}', [WalletController::class, 'balance'])->name('balance');
         Route::get('/transactions/{user}', [WalletController::class, 'transactions'])->name('transactions');
-
-    })  ;
+    });
 });

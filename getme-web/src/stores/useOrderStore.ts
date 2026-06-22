@@ -1,137 +1,140 @@
+import { shoppingService } from '@/services/shoppingService';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+
+export type OrderStep = 'history' | 'cart' | 'route' | 'summary' | 'finding_rider';
+export type AddressMode = 'saved' | 'custom';
 
 export interface ShoppingItem {
   shop?: string;
   product_name: string;
   unit: string;
-  quantity: number ;
-  allow_substitutes: boolean;
-  estimated_price_per_unit?: number;
+  quantity: number;
+  estimated_price_per_unit: number;
   substitute_allowed: boolean;
-  photo_url?: string;
   notes?: string;
+  photo_url?: string;
 }
 
-export interface CustomAddress {
+export interface LocationCoordinates {
   lat: number;
   lng: number;
   description: string;
 }
 
+export interface FeePreview {
+  distance_km: number;
+  delivery_fee: number;
+  items_estimated_cost: number;
+  total_order_cost: number;
+  wallet_sufficient: boolean;
+  suggested_topup_amount: number;
+}
+
 interface OrderState {
-  step: 'market' | 'items' | 'logistics' | 'delivery' | 'summary';
+  step: OrderStep;
+  history: any[];
+  shoppingListId: string | null;
+  feePreview: FeePreview | null;
+  addressMode: AddressMode;
   title: string;
   preferred_pickup_start_time: string;
+  delivery_address_id: string | null;
   note_for_rider: string;
   tip_amount: number;
-  market_location: {
-    lat: number;
-    lng: number;
-    description: string;
-  };
+  market_location: LocationCoordinates;
+  custom_delivery_location: LocationCoordinates;
   items: ShoppingItem[];
-  // Address Strategy: 'saved' or 'custom'
-  addressMode: 'saved' | 'custom';
-  delivery_address_id: string | null;
-  custom_delivery_location: CustomAddress | null;
-  
-  // Setters
-  setStep: (step: OrderState['step']) => void;
-  updateMarketLocation: (lat: number, lng: number, description?: string) => void;
-  updateItem: (index: number, updates: Partial<ShoppingItem>) => void;
-  addItem: () => void;
-  removeItem: (index: number) => void;
-  updateLogistics: (fields: Partial<Pick<OrderState, 'title' | 'preferred_pickup_start_time' | 'note_for_rider' | 'tip_amount'>>) => void;
-  setAddressMode: (mode: 'saved' | 'custom') => void;
+  hydrateFromOrder: (order: any) => void;
+}
+
+interface OrderActions {
+  setStep: (step: OrderStep) => void;
+  setHistory: (history: any[]) => void;
+  fetchHistory: () => Promise<void>;
+  loadOrderToStore: (order: any) => void;
+  setShoppingListId: (id: string | null) => void;
+  setFeePreview: (preview: FeePreview | null) => void;
+  setAddressMode: (mode: AddressMode) => void;
   setSavedAddressId: (id: string | null) => void;
-  updateCustomAddress: (updates: Partial<CustomAddress>) => void;
-  
-  // Validation Checkers
-  isLastItemValid: () => boolean;
+  updateMarketLocation: (lat: number, lng: number, description?: string) => void;
+  updateCustomAddress: (updates: Partial<LocationCoordinates>) => void;
+  updateLogistics: (updates: Partial<Pick<OrderState, 'title' | 'preferred_pickup_start_time' | 'note_for_rider' | 'tip_amount'>>) => void;
+  addItem: (item: ShoppingItem) => void;
+  removeItem: (index: number) => void;
   clearStore: () => void;
 }
 
-const initialFormValues = {
-  step: 'market' as const,
+const initialLocation = { lat: -1.2921, lng: 36.8219, description: '' };
+
+export const useOrderStore = create<OrderState & OrderActions>((set) => ({
+  step: 'history', 
+  history: [],
+  items: [],
+  shoppingListId: null,
+  feePreview: null,
+  addressMode: 'saved',
   title: '',
   preferred_pickup_start_time: '',
-  note_for_rider: '',
-  tip_amount: 10,
-  market_location: { lat: -1.286389, lng: 36.817223, description: '' },
-  items: [{ product_name: '', unit: 'kg', quantity: 1, substitute_allowed: true }],
-  addressMode: 'saved' as const,
   delivery_address_id: null,
-  custom_delivery_location: null,
-};
+  note_for_rider: '',
+  tip_amount: 0,
+  market_location: { ...initialLocation },
+  custom_delivery_location: { ...initialLocation },
 
-export const useOrderStore = create<OrderState>()(
-  persist(
-    (set, get) => ({
-      ...initialFormValues,
-
-      setStep: (step) => set({ step }),
-
-      updateMarketLocation: (lat, lng, description) => set((state) => ({
-        market_location: { 
-          lat, 
-          lng, 
-          description: description !== undefined ? description : state.market_location.description 
-        }
-      })),
-
-      updateItem: (index, updates) => set((state) => {
-        const newItems = [...state.items];
-        newItems[index] = { ...newItems[index], ...updates };
-        return { items: newItems };
-      }),
-
-      isLastItemValid: () => {
-        const items = get().items;
-        if (items.length === 0) return false;
-        const lastItem = items[items.length - 1];
-        return (
-          lastItem.product_name.trim() !== '' &&
-          lastItem.unit.trim() !== '' &&
-          lastItem.quantity > 0
-        );
-      },
-
-      addItem: () => {
-        if (get().isLastItemValid()) {
-          set((state) => ({
-            items: [...state.items, { product_name: '', unit: 'kg', quantity: 1, substitute_allowed: true }]
-          }));
-        }
-      },
-
-      removeItem: (index) => set((state) => {
-        if (state.items.length <= 1) return {};
-        return { items: state.items.filter((_, i) => i !== index) };
-      }),
-
-      updateLogistics: (fields) => set((state) => ({ ...state, ...fields })),
-
-      setAddressMode: (mode) => set((state) => ({
-        addressMode: mode,
-        // Initialize basic structure if custom option selected
-        custom_delivery_location: mode === 'custom' && !state.custom_delivery_location 
-          ? { lat: -1.286389, lng: 36.817223, description: '' } 
-          : state.custom_delivery_location
-      })),
-
-      setSavedAddressId: (id) => set({ delivery_address_id: id }),
-
-      updateCustomAddress: (updates) => set((state) => ({
-        custom_delivery_location: state.custom_delivery_location 
-          ? { ...state.custom_delivery_location, ...updates }
-          : { lat: -1.286389, lng: 36.817223, description: '', ...updates }
-      })),
-
-      clearStore: () => set(initialFormValues),
-    }),
-    {
-      name: 'market-order-persistence-store',
-    }
-  )
-);
+  hydrateFromOrder: (order) => set({
+    title: order.title,
+    items: order.items,
+    market_location: order.market_location,
+    shoppingListId: order.id,
+    step: 'cart', // Jump back to the cart step
+  }),
+  setStep: (step) => set({ step }),
+  setHistory: (history) => set({ history }),
+  setShoppingListId: (id) => set({ shoppingListId: id }),
+  setFeePreview: (preview) => set({ feePreview: preview }),
+  setAddressMode: (mode) => set({ addressMode: mode }),
+  setSavedAddressId: (id) => set({ delivery_address_id: id }),
+  fetchHistory: async () => {
+      try{
+        const  data = await shoppingService.getHistory();
+        set({history: data});
+      }catch(e){
+        console.log('failed to store history ' ,e);
+      }
+  },
+  loadOrderToStore: (order :any) => {
+    set({
+      setShoppingListId: order.id,
+      title: order.title,
+      items: order.items,
+      market_location: order.market_location || { lat: 0, lng: 0, description: '' },
+      addressMode: order.delivery_address_id ? 'saved' : 'custom',
+      delivery_address_id: order.delivery_address_id || null,
+      custom_delivery_location: order.delivery_location || { lat: 0, lng: 0, description: '' },      
+      step: 'cart'
+    })
+  },
+  updateMarketLocation: (lat, lng, description) => set((state) => ({
+    market_location: { ...state.market_location, lat, lng, ...(description !== undefined && { description }) }
+  })),
+  updateCustomAddress: (updates) => set((state) => ({
+    custom_delivery_location: { ...state.custom_delivery_location, ...updates }
+  })),
+  updateLogistics: (updates) => set((state) => ({ ...state, ...updates })),
+  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
+  removeItem: (index) => set((state) => ({ items: state.items.filter((_, idx) => idx !== index) })),
+  clearStore: () => set({
+    step: 'history',
+    shoppingListId: null,
+    feePreview: null,
+    addressMode: 'saved',
+    title: '',
+    preferred_pickup_start_time: '',
+    delivery_address_id: null,
+    note_for_rider: '',
+    tip_amount: 0,
+    market_location: { ...initialLocation },
+    custom_delivery_location: { ...initialLocation },
+    items: [],
+  }),
+}));

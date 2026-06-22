@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('total_actual_cost', 10, 2)->default(0);
             $table->foreignUlid('delivery_address_id')->nullable()->constrained('addresses', 'id');
             $table->foreignUlid('rider_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->text('note_for_rider');
+            $table->text('note_for_rider')->nullable();
             $table->timestamps();
         });
     }

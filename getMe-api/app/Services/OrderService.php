@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
+
 class OrderService
 {
 
@@ -28,6 +29,57 @@ class OrderService
         protected WalletService $walletService
     ) {}
 
+    /**
+     * Create a transient MarketLocation instance (not saved to DB)
+     */
+    public function makeMarketLocationInstance(array $data): OrderLocation
+    {
+        return new OrderLocation([
+            'lat' => $data['lat'],
+            'lng' => $data['lng'],
+            'description' => $data['description'] ?? null,
+        ]);
+    }
+
+    /**
+     * Calculate distance between two points using the Haversine formula
+     * Accepts either Model instances or arrays with 'lat' and 'lng'
+     */
+    public function calculateDistanceBetweenPoints($point1, $point2): float
+    {
+        $lat1 = $point1['lat'] ?? $point1->lat;
+        $lng1 = $point1['lng'] ?? $point1->lng;
+        $lat2 = $point2['lat'] ?? $point2->lat;
+        $lng2 = $point2['lng'] ?? $point2->lng;
+
+        $earthRadius = 6371; 
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLng / 2) * sin($dLng / 2);
+             
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        
+        return $earthRadius * $c;
+    }
+
+    /**
+     * Create a transient DeliveryLocation instance (not saved to DB)
+     */
+    public function makeDeliveryLocationInstance(User $user, array $data): OrderLocation
+    {
+        // If you have a delivery_address_id, you might fetch it from DB 
+        // Or create a fresh instance from custom lat/lng coordinates
+        return new OrderLocation([
+            'lat' => $data['delivery_location']['lat'] ?? 0,
+            'lng' => $data['delivery_location']['lng'] ?? 0,
+            'description' => $data['delivery_location']['description'] ?? null,
+            'user_id' => $user->id,
+        ]);
+    }
     /**
      * Create order from shopping list
      */
@@ -289,8 +341,9 @@ class OrderService
      */
     public function  sufficinetWalletBalance(string $userId,  float  $estimatedCost)
     {
-        $balance =  $this->walletService->getBalance($userId);
-        return ($balance['success'] && $balance['balance'] >= $estimatedCost);
+        $balance =  $this->walletService->getBalance($userId) ?? ['balance' => 0];
+
+        return ($balance['success'] && $balance['available_balance'] >= $estimatedCost);
     }
 
 
@@ -299,6 +352,7 @@ class OrderService
      */
     public function createMarketLocation(array $marketData): ?OrderLocation
     {
+        Log::info('Creating market location', ['data' => $marketData]);
         try {
             $marketLocation = OrderLocation::create([
                 'lat' => $marketData['lat'],
@@ -313,31 +367,31 @@ class OrderService
     }
 
     /**
-     * Create delivery location based on client role
+     * Create delivery location based on provided address or custom parameters.
      */
     public function createDeliveryLocation(User $client, array $data): ?OrderLocation
     {
+
+    Log::alert('Creating delivery location', ['data' => $data]);
         try {
-            $client->load(['addresses']);
+            if (!empty($data['delivery_address_id'])) {
+                $address = $client->addresses()->where('id', $data['delivery_address_id'])->first();
 
-            $addresses = $client->addresses;
+                if (!$address) {
+                    Log::error("Explicit address ID {$data['delivery_address_id']} not found for client ID: {$client->id}");
+                    throw new \InvalidArgumentException('The selected saved address could not be found.');
+                }
 
-
-            if ($addresses->isEmpty()) {
-                Log::warning('No addresses found for client ID: ' . $client->id . ', creating from request data.');
-                return $this->createDeliveryLocationFromRequest($data);
+                // Pass the specific loaded address record to your creator method
+                return $this->createDeliveryLocationFromAddressRecord($address);
             }
 
-            // Find default address or fallback to first one
-            $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
+           
+                return $this->createDeliveryLocationFromRequest($data['delivery_location']);
 
+            // Fallback safety checkpoint
+            // throw new \InvalidArgumentException('Delivery destination missing: require either a valid saved address or map coordinates.');
 
-            if (!$defaultAddress) {
-                Log::error('No usable address found for client ID: ' . $client->id);
-                return $this->createDeliveryLocationFromRequest($data);
-            }
-
-            return $this->createDeliveryLocationFromDefaultAddress($client);
         } catch (\Exception $e) {
             Log::error('Failed to create delivery location for client ID: ' . ($client->id ?? 'unknown') . ' - ' . $e->getMessage());
             throw new \RuntimeException('Unable to create delivery location', 0, $e);
@@ -347,17 +401,10 @@ class OrderService
     {
 
 
-        // Check if delivery location is provided in request
-        if (!isset($data['delivery_location'])) {
-            throw new Exception('Delivery location is required for admin users');
-        }
-
-        $deliveryData = $data['delivery_location'];
-
         return OrderLocation::create([
-            'lat' => $deliveryData['lat'],
-            'lng' => $deliveryData['lng'],
-            'description' => $deliveryData['description'] ?? 'Delivery Location',
+            'lat' => $data['lat'],
+            'lng' => $data['lng'],
+            'description' => $data['description'] ?? 'Delivery Location',
         ]);
     }
 

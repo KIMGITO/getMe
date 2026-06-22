@@ -17,6 +17,7 @@ import UserHomePage from '../pages/UserHome';
 import LandingPage from '../pages/Landing';
 import RiderHomePage from '../pages/rider/RiderHomePage';
 import RiderProfileForm from '../pages/rider/RiderProfileForm';
+import IntegratedOrderPage from '@/pages/order-page';
 
 export const router = createBrowserRouter([
   {
@@ -60,7 +61,7 @@ export const router = createBrowserRouter([
         children: [
           { path: ROUTES.CLIENT_HOME, element: <UserHomePage /> },
           { path: ROUTES.CLIENT_PROFILE, element: <ClientProfile /> },
-          { path: ROUTES.SHOPPINGLIST, element: <MarketOrderForm /> },
+          { path: ROUTES.SHOPPING_LIST, element: <IntegratedOrderPage /> },
         ],
       },
 

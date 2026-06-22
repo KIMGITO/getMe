@@ -56,8 +56,8 @@ export default function Navigation() {
 
     // Default Fallback to Client Track
     return [
-      { path: ROUTES.CLIENT_HOME, label: 'Home', icon: BiHome },
-      { path: ROUTES.SHOPPING_LIST, label: 'Orders', icon: BiPackage },
+      { path: ROUTES.CLIENT_HOME, label: 'Home', icon: BiHome },  
+      { path: ROUTES.SHOPPING_LIST, label: 'Shop', icon: BiPackage },
       { path: ROUTES.WALLET, label: 'Wallet', icon: BiWallet },
       { path: ROUTES.CLIENT_PROFILE, label: 'Profile', icon: BiUser },
     ];
